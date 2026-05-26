@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment — real keys live here, never commit
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+nohup.out
+logs/
+
+# OS
+.DS_Store
+
+# TypeScript cache
+*.tsbuildinfo
