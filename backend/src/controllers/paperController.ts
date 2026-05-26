@@ -4,8 +4,6 @@ import { GeneratedPaper } from '../models/GeneratedPaper';
 import { Assignment } from '../models/Assignment';
 import type { ApiResponse, QuestionDifficulty } from '../types/index';
 
-// ─── GET /api/paper/:id ───────────────────────────────────────────────────────
-
 export async function getPaper(
   req: Request,
   res: Response,
@@ -34,8 +32,6 @@ export async function getPaper(
   }
 }
 
-// ─── GET /api/paper/:id/by-assignment ─────────────────────────────────────────
-
 export async function getPaperByAssignment(
   req: Request,
   res: Response,
@@ -63,8 +59,6 @@ export async function getPaperByAssignment(
     next(error);
   }
 }
-
-// ─── GET /api/paper/:id/pdf ───────────────────────────────────────────────────
 
 export async function downloadPdf(
   req: Request,
@@ -137,8 +131,6 @@ export async function downloadPdf(
     next(error);
   }
 }
-
-// ─── HTML Template for PDF ─────────────────────────────────────────────────────
 
 function generatePaperHTML(
   subject: string,

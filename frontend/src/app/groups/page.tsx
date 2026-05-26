@@ -16,7 +16,6 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { cn } from '@/lib/utils';
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
 interface Group {
   id: string;
   name: string;
@@ -28,7 +27,6 @@ interface Group {
   createdAt: string;
 }
 
-// ─── Seed demo data ────────────────────────────────────────────────────────────
 const DEMO_GROUPS: Group[] = [
   { id: '1', name: 'Class 10 — Science', subject: 'Science', grade: 'Grade 10', studentCount: 34, assignmentCount: 5, color: '#D4521A', createdAt: '2025-01-10' },
   { id: '2', name: 'Class 9 — Mathematics', subject: 'Mathematics', grade: 'Grade 9', studentCount: 38, assignmentCount: 3, color: '#0F766E', createdAt: '2025-01-14' },
@@ -36,7 +34,6 @@ const DEMO_GROUPS: Group[] = [
   { id: '4', name: 'Class 10 — Social Studies', subject: 'Social Studies', grade: 'Grade 10', studentCount: 36, assignmentCount: 4, color: '#0369A1', createdAt: '2025-01-22' },
 ];
 
-// ─── Group Card ────────────────────────────────────────────────────────────────
 function GroupCard({
   group,
   onDelete,
@@ -54,7 +51,7 @@ function GroupCard({
 
   return (
     <div className="bg-white rounded-[14px] border border-veda-gray-200 p-5 hover:shadow-card-hover transition-all duration-200 group relative">
-      {/* Top row */}
+
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div
@@ -69,7 +66,6 @@ function GroupCard({
           </div>
         </div>
 
-        {/* Menu */}
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
@@ -98,7 +94,6 @@ function GroupCard({
         </div>
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-1.5 text-[12px] text-veda-gray-500">
           <Users className="w-3.5 h-3.5" />
@@ -111,7 +106,6 @@ function GroupCard({
         </div>
       </div>
 
-      {/* Subject badge */}
       <div className="flex items-center justify-between pt-3 border-t border-veda-gray-100">
         <span
           className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
@@ -127,7 +121,6 @@ function GroupCard({
   );
 }
 
-// ─── Create Group Modal ────────────────────────────────────────────────────────
 function CreateGroupModal({ onClose, onCreate }: { onClose: () => void; onCreate: (g: Group) => void }) {
   const [name, setName] = useState('');
   const [subject, setSubject] = useState('');
@@ -208,7 +201,6 @@ function CreateGroupModal({ onClose, onCreate }: { onClose: () => void; onCreate
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>(DEMO_GROUPS);
   const [search, setSearch] = useState('');
@@ -228,7 +220,6 @@ export default function GroupsPage() {
     <MainLayout>
       <div className="p-6 max-w-[1100px] mx-auto">
 
-        {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-[22px] font-bold text-veda-gray-900 tracking-tight mb-1">My Groups</h1>
@@ -243,7 +234,6 @@ export default function GroupsPage() {
           </button>
         </div>
 
-        {/* Search */}
         {groups.length > 0 && (
           <div className="relative max-w-[320px] mb-5">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-veda-gray-400" />
@@ -257,7 +247,6 @@ export default function GroupsPage() {
           </div>
         )}
 
-        {/* Empty state */}
         {groups.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
             <div className="w-16 h-16 rounded-full bg-veda-gray-100 flex items-center justify-center mb-4">
@@ -277,7 +266,6 @@ export default function GroupsPage() {
           </div>
         )}
 
-        {/* Grid */}
         {filtered.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
             {filtered.map((group) => (
@@ -286,14 +274,12 @@ export default function GroupsPage() {
           </div>
         )}
 
-        {/* No search results */}
         {groups.length > 0 && filtered.length === 0 && (
           <p className="text-center py-16 text-veda-gray-400 text-[13.5px]">
             No groups match &quot;{search}&quot;
           </p>
         )}
 
-        {/* Stats bar at bottom */}
         {groups.length > 0 && (
           <div className="flex items-center gap-6 mt-6 pt-5 border-t border-veda-gray-200">
             <div className="flex items-center gap-2 text-[12.5px] text-veda-gray-500">

@@ -20,7 +20,6 @@ import { assignmentsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { Assignment } from '@/types/index';
 
-// ─── Difficulty badge ──────────────────────────────────────────────────────────
 function DiffBadge({ label, color }: { label: string; color: string }) {
   return (
     <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', color)}>
@@ -29,7 +28,6 @@ function DiffBadge({ label, color }: { label: string; color: string }) {
   );
 }
 
-// ─── Paper Card ────────────────────────────────────────────────────────────────
 function PaperCard({
   assignment,
   starred,
@@ -45,7 +43,7 @@ function PaperCard({
 
   return (
     <div className="bg-white rounded-[14px] border border-veda-gray-200 p-5 hover:shadow-card-hover transition-all duration-200 group flex flex-col gap-4">
-      {/* Header */}
+
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-[10px] bg-veda-orange-light flex items-center justify-center shrink-0">
@@ -72,7 +70,6 @@ function PaperCard({
         </button>
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 text-[12px]">
         <div className="flex items-center gap-1.5 text-veda-gray-500">
           <Hash className="w-3 h-3" />
@@ -84,7 +81,6 @@ function PaperCard({
         </div>
       </div>
 
-      {/* Type chips */}
       {types.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {types.slice(0, 3).map((t) => (
@@ -100,7 +96,6 @@ function PaperCard({
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex items-center gap-2 pt-3 border-t border-veda-gray-100">
         <Link
           href={`/paper/${assignment._id}`}
@@ -121,7 +116,6 @@ function PaperCard({
   );
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton() {
   return (
     <div className="bg-white rounded-[14px] border border-veda-gray-200 p-5 animate-pulse">
@@ -145,7 +139,6 @@ function Skeleton() {
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 type Tab = 'all' | 'starred';
 
 export default function LibraryPage() {
@@ -190,7 +183,6 @@ export default function LibraryPage() {
     <MainLayout>
       <div className="p-6 max-w-[1100px] mx-auto">
 
-        {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-[22px] font-bold text-veda-gray-900 tracking-tight mb-1">My Library</h1>
@@ -205,9 +197,8 @@ export default function LibraryPage() {
           </button>
         </div>
 
-        {/* Tabs + Search */}
         <div className="flex items-center gap-4 mb-5">
-          {/* Tabs */}
+
           <div className="flex items-center gap-1 p-1 bg-veda-gray-100 rounded-[10px]">
             {(['all', 'starred'] as Tab[]).map((t) => (
               <button
@@ -231,7 +222,6 @@ export default function LibraryPage() {
             ))}
           </div>
 
-          {/* Search */}
           <div className="relative flex-1 max-w-[300px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-veda-gray-400" />
             <input
@@ -248,7 +238,6 @@ export default function LibraryPage() {
           </div>
         </div>
 
-        {/* Error */}
         {error && !loading && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-[10px] text-red-700 text-[13px] mb-5">
             {error}{' '}
@@ -256,14 +245,12 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} />)}
           </div>
         )}
 
-        {/* Empty state — no papers */}
         {!loading && papers.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
             <div className="w-16 h-16 rounded-full bg-veda-gray-100 flex items-center justify-center mb-4">
@@ -282,7 +269,6 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Empty state — no starred */}
         {!loading && papers.length > 0 && tab === 'starred' && starred.size === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
             <Star className="w-10 h-10 text-veda-gray-200 mb-3" />
@@ -291,7 +277,6 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Grid */}
         {!loading && displayed.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
             {displayed.map((p) => (
@@ -305,7 +290,6 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* No search match */}
         {!loading && papers.length > 0 && displayed.length === 0 && search && (
           <div className="text-center py-16 text-veda-gray-400 text-[13.5px]">
             No papers match &quot;{search}&quot;

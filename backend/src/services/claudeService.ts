@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import type { GeneratedPaperData, QuestionTypeConfig } from '../types/index';
 
-// ─── Zod validation schema (shared across all providers) ──────────────────────
-
 const QuestionSchema = z.object({
   text: z.string().min(1),
   difficulty: z.enum(['easy', 'medium', 'hard']),
@@ -19,8 +17,6 @@ const SectionSchema = z.object({
 const PaperSchema = z.object({
   sections: z.array(SectionSchema).min(1),
 });
-
-// ─── Shared system prompt ──────────────────────────────────────────────────────
 
 const SYSTEM_PROMPT = `You are an exam paper generator for schools and colleges.
 Return ONLY a valid JSON object with no explanation, no markdown, no backticks, no code blocks.
@@ -42,8 +38,6 @@ The JSON must strictly follow this schema:
   ]
 }
 Rules: difficulty must be exactly "easy", "medium", or "hard". marks must be a positive integer. No answer keys.`;
-
-// ─── Build user prompt ────────────────────────────────────────────────────────
 
 function buildUserPrompt(
   subject: string,
@@ -76,8 +70,6 @@ Vary difficulty: ~40% easy, ~40% medium, ~20% hard.`;
   return prompt;
 }
 
-// ─── Parse & validate response (used by all providers) ────────────────────────
-
 function parseAndValidate(rawText: string): GeneratedPaperData {
   const cleaned = rawText
     .replace(/^```(?:json)?\s*/i, '')
@@ -99,8 +91,6 @@ function parseAndValidate(rawText: string): GeneratedPaperData {
   return result.data as GeneratedPaperData;
 }
 
-// ─── Provider: Claude (Anthropic) ────────────────────────────────────────────
-
 async function generateWithClaude(userPrompt: string): Promise<GeneratedPaperData> {
   const { default: Anthropic } = await import('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -117,15 +107,11 @@ async function generateWithClaude(userPrompt: string): Promise<GeneratedPaperDat
   return parseAndValidate(content.text);
 }
 
-// ─── Provider: Gemini (Google — free tier, direct REST) ──────────────────────
-
 async function generateWithGemini(userPrompt: string): Promise<GeneratedPaperData> {
-  // Use axios (already a dependency) to call the Gemini REST API directly.
-  // This avoids @google/generative-ai SDK versioning issues entirely.
+  // using axios directly to avoid @google/generative-ai SDK versioning issues
   const axios = (await import('axios')).default;
   const apiKey = process.env.GEMINI_API_KEY!;
 
-  // Free tier models in preference order
   const models = [
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
@@ -173,8 +159,6 @@ async function generateWithGemini(userPrompt: string): Promise<GeneratedPaperDat
 
   throw lastErr ?? new Error('All Gemini models failed');
 }
-
-// ─── Provider: Mock (no API key needed) ───────────────────────────────────────
 
 function generateMock(
   subject: string,
@@ -281,8 +265,6 @@ function generateMock(
   return { sections };
 }
 
-// ─── Main export — auto-selects provider ──────────────────────────────────────
-
 export async function generatePaper(
   subject: string,
   dueDate: string,
@@ -293,7 +275,6 @@ export async function generatePaper(
   const hasAnthropic = !!process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'your_anthropic_api_key_here';
   const hasGemini = !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here';
 
-  // Determine provider
   let provider: 'claude' | 'gemini' | 'mock';
   if (hasAnthropic) provider = 'claude';
   else if (hasGemini) provider = 'gemini';
@@ -304,13 +285,13 @@ export async function generatePaper(
   const userPrompt = buildUserPrompt(subject, dueDate, questionTypes, additionalInstructions, fileContent);
   let lastError: Error | null = null;
 
-  // Two attempts for real providers; mock never fails
+  // 2 attempts for real providers; mock never fails
   const maxAttempts = provider === 'mock' ? 1 : 2;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       if (provider === 'mock') {
-        // Simulate processing delay so WS progress events are visible
+        // small delay so WS progress events are visible in the UI
         await new Promise((r) => setTimeout(r, 1500));
         return generateMock(subject, questionTypes);
       }
@@ -327,7 +308,7 @@ export async function generatePaper(
     }
   }
 
-  // If real provider failed, fall back to mock rather than crashing
+  // real provider failed — fall back to mock rather than surfacing a hard error
   console.warn('[AI] Real provider failed — falling back to mock');
   return generateMock(subject, questionTypes);
 }

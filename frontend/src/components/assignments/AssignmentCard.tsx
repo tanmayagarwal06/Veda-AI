@@ -50,13 +50,10 @@ export function AssignmentCard({ assignment, onDelete, onRegenerate }: Assignmen
       )}
       onClick={handleView}
     >
-      {/* Header row */}
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-veda-gray-900 font-semibold text-[14px] leading-snug line-clamp-2 flex-1 pr-2">
           {assignment.subject}
         </h3>
-
-        {/* Three-dot menu */}
         <div className="relative shrink-0" ref={menuRef}>
           <button
             className={cn(
@@ -72,8 +69,6 @@ export function AssignmentCard({ assignment, onDelete, onRegenerate }: Assignmen
           >
             <MoreVertical className="w-4 h-4" strokeWidth={2} />
           </button>
-
-          {/* Dropdown */}
           {menuOpen && (
             <div className="absolute right-0 top-8 z-50 w-[148px] bg-white rounded-[10px] shadow-float border border-veda-gray-200 py-1 animate-fade-in">
               <button
@@ -114,8 +109,6 @@ export function AssignmentCard({ assignment, onDelete, onRegenerate }: Assignmen
           )}
         </div>
       </div>
-
-      {/* Status indicator */}
       {assignment.status !== 'done' && (
         <div className="flex items-center gap-1.5 mb-3">
           <span className={cn('w-1.5 h-1.5 rounded-full', STATUS_DOT[assignment.status])} />
@@ -124,8 +117,6 @@ export function AssignmentCard({ assignment, onDelete, onRegenerate }: Assignmen
           </span>
         </div>
       )}
-
-      {/* Footer: dates */}
       <div className="flex items-center justify-between mt-auto pt-2 border-t border-veda-gray-100">
         <span className="text-[11px] text-veda-gray-400">
           Assigned on{' '}

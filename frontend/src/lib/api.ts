@@ -9,13 +9,11 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ─── Request interceptor ──────────────────────────────────────────────────────
 apiClient.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error)
 );
 
-// ─── Response interceptor ─────────────────────────────────────────────────────
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
@@ -27,8 +25,6 @@ apiClient.interceptors.response.use(
     return Promise.reject(new Error(message));
   }
 );
-
-// ─── Assignments API ──────────────────────────────────────────────────────────
 
 interface CreateAssignmentPayload {
   subject: string;
@@ -77,8 +73,6 @@ export const assignmentsApi = {
     return data.data!;
   },
 };
-
-// ─── Papers API ───────────────────────────────────────────────────────────────
 
 export const papersApi = {
   getByAssignment: async (

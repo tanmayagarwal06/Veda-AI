@@ -33,13 +33,11 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
-    // exact match for top-level pages so /assignments doesn't also match /assignments/…
     return pathname === href || pathname.startsWith(href + '/');
   };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-[228px] bg-veda-black flex flex-col z-40 select-none">
-      {/* ── Logo ── */}
       <div className="px-5 pt-5 pb-4">
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 rounded-[7px] bg-gradient-veda flex items-center justify-center shadow-sm shrink-0">
@@ -50,8 +48,6 @@ export function Sidebar() {
           </span>
         </Link>
       </div>
-
-      {/* ── Create Assignment CTA ── */}
       <div className="px-3 pb-4">
         <Link
           href="/create"
@@ -69,8 +65,6 @@ export function Sidebar() {
           Create Assignment
         </Link>
       </div>
-
-      {/* ── Nav Items ── */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
@@ -104,8 +98,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
-      {/* ── Bottom ── */}
       <div className="px-3 pb-4 border-t border-white/[0.06] pt-3 mt-2 space-y-0.5">
         <Link
           href="/settings"
@@ -114,8 +106,6 @@ export function Sidebar() {
           <Settings className="w-4 h-4 shrink-0" strokeWidth={1.5} />
           Settings
         </Link>
-
-        {/* User Profile */}
         <div className="flex items-center gap-3 px-3 py-2.5 mt-1">
           <div className="w-7 h-7 rounded-full bg-gradient-veda flex items-center justify-center shrink-0 shadow-sm">
             <span className="text-white text-[11px] font-bold">D</span>

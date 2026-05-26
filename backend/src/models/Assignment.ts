@@ -1,8 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import type { QuestionTypeConfig, AssignmentStatus } from '../types/index';
 
-// ─── Interface ─────────────────────────────────────────────────────────────────
-
 export interface IAssignment extends Document {
   subject: string;
   dueDate: Date;
@@ -13,8 +11,6 @@ export interface IAssignment extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ─── Schema ────────────────────────────────────────────────────────────────────
 
 const QuestionTypeConfigSchema = new Schema<QuestionTypeConfig>(
   {
@@ -71,8 +67,6 @@ const AssignmentSchema = new Schema<IAssignment>(
   }
 );
 
-// ─── Virtuals ──────────────────────────────────────────────────────────────────
-
 AssignmentSchema.virtual('totalQuestions').get(function (this: IAssignment) {
   return this.questionTypes.reduce((sum, qt) => sum + qt.numberOfQuestions, 0);
 });
@@ -84,12 +78,8 @@ AssignmentSchema.virtual('totalMarks').get(function (this: IAssignment) {
   );
 });
 
-// ─── Indexes ───────────────────────────────────────────────────────────────────
-
 AssignmentSchema.index({ status: 1 });
 AssignmentSchema.index({ createdAt: -1 });
-
-// ─── Model ─────────────────────────────────────────────────────────────────────
 
 export const Assignment: Model<IAssignment> = mongoose.model<IAssignment>(
   'Assignment',

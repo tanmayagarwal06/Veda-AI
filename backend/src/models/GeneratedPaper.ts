@@ -1,8 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import type { PaperSection, GeneratedQuestion, QuestionDifficulty, QuestionType } from '../types/index';
 
-// ─── Interfaces ────────────────────────────────────────────────────────────────
-
 export interface IGeneratedPaper extends Document {
   assignmentId: Types.ObjectId;
   sections: PaperSection[];
@@ -10,8 +8,6 @@ export interface IGeneratedPaper extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// ─── Sub-schemas ───────────────────────────────────────────────────────────────
 
 const QuestionSchema = new Schema<GeneratedQuestion>(
   {
@@ -47,8 +43,6 @@ const SectionSchema = new Schema<PaperSection>(
   { _id: false }
 );
 
-// ─── Main Schema ───────────────────────────────────────────────────────────────
-
 const GeneratedPaperSchema = new Schema<IGeneratedPaper>(
   {
     assignmentId: {
@@ -77,8 +71,6 @@ const GeneratedPaperSchema = new Schema<IGeneratedPaper>(
   }
 );
 
-// ─── Virtuals ──────────────────────────────────────────────────────────────────
-
 GeneratedPaperSchema.virtual('totalQuestions').get(function (this: IGeneratedPaper) {
   return this.sections.reduce((sum, s) => sum + s.questions.length, 0);
 });
@@ -89,8 +81,6 @@ GeneratedPaperSchema.virtual('totalMarks').get(function (this: IGeneratedPaper) 
     0
   );
 });
-
-// ─── Model ─────────────────────────────────────────────────────────────────────
 
 export const GeneratedPaper: Model<IGeneratedPaper> = mongoose.model<IGeneratedPaper>(
   'GeneratedPaper',

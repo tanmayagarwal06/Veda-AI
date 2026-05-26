@@ -23,28 +23,26 @@ export function useWebSocket({
   const reconnectAttempts = useRef(0);
   const maxReconnects = 3;
 
-  // ── Store callbacks in refs so they never appear in useCallback/useEffect deps.
-  // This is the key fix — inline functions passed as props change every render,
-  // which would recreate `connect` and retrigger the effect → infinite loop.
+  // Store callbacks in refs — inline functions passed as props change every render,
+  // which would recreate `connect` and retrigger the effect causing an infinite loop.
   const onCompleteRef = useRef(onComplete);
   const onFailedRef = useRef(onFailed);
   const onProgressRef = useRef(onProgress);
 
-  // Keep refs in sync with latest props each render (no re-render caused)
+  // keep latest callbacks in sync each render without triggering re-renders
   useEffect(() => {
     onCompleteRef.current = onComplete;
     onFailedRef.current = onFailed;
     onProgressRef.current = onProgress;
   });
 
-  // Pull stable store setters once — Zustand setters are referentially stable
+  // Zustand setters are stable references — safe to use as useCallback deps
   const setWs = useSocketStore((s) => s.setWs);
   const setConnectionStatus = useSocketStore((s) => s.setConnectionStatus);
   const setProgress = useSocketStore((s) => s.setProgress);
   const setComplete = useSocketStore((s) => s.setComplete);
   const setFailed = useSocketStore((s) => s.setFailed);
 
-  // `connect` only depends on `assignmentId` and stable store setters
   const connect = useCallback(() => {
     if (!assignmentId) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;

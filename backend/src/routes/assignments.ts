@@ -24,8 +24,6 @@ const upload = multer({
   },
 });
 
-// ─── Routes ────────────────────────────────────────────────────────────────────
-
 // List all assignments
 router.get('/', listAssignments);
 

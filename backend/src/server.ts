@@ -9,8 +9,7 @@ import type { WSOutboundMessage } from './types/index';
 
 const PORT = parseInt(process.env.PORT || '4000', 10);
 
-// ─── WebSocket Room Management ─────────────────────────────────────────────────
-// Map: assignmentId → Set of connected WebSocket clients
+// assignmentId → connected WS clients for that job
 const rooms = new Map<string, Set<WebSocket>>();
 
 function addToRoom(assignmentId: string, ws: WebSocket): void {
@@ -40,19 +39,14 @@ function broadcastToRoom(assignmentId: string, message: WSOutboundMessage): void
   }
 }
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
-
 async function start(): Promise<void> {
-  // Connect to DB and Redis
   await connectDatabase();
   await connectRedis();
 
-  // Subscribe to paper events from workers
-  // Connect the subscriber client (it has its own connection — pub/sub clients can't share)
+  // pub/sub clients need their own connection — can't share with BullMQ
   if (redisSubscriber.status === 'wait' || redisSubscriber.status === 'close') {
     await redisSubscriber.connect();
   }
-  // ioredis: subscribe() joins the channel; messages arrive on the 'message' event
   await redisSubscriber.subscribe(PAPER_EVENTS_CHANNEL);
   redisSubscriber.on('message', (_channel: string, message: string) => {
     try {
@@ -65,10 +59,7 @@ async function start(): Promise<void> {
 
   console.log(`✅ Subscribed to Redis channel: ${PAPER_EVENTS_CHANNEL}`);
 
-  // Create HTTP server
   const server = http.createServer(app);
-
-  // Attach WebSocket server to the same HTTP server
   const wss = new WebSocketServer({ server, path: '/ws' });
 
   wss.on('connection', (ws, req) => {
@@ -82,19 +73,14 @@ async function start(): Promise<void> {
         const msg = JSON.parse(rawData.toString());
 
         if (msg.type === 'subscribe' && typeof msg.assignmentId === 'string') {
-          // Leave any previous room
-          if (subscribedRoom) {
-            removeFromRoom(subscribedRoom, ws);
-          }
+          if (subscribedRoom) removeFromRoom(subscribedRoom, ws);
           subscribedRoom = msg.assignmentId as string;
           addToRoom(subscribedRoom as string, ws);
           console.log(`[WS] Client subscribed to room: ${subscribedRoom}`);
-
-          // Acknowledge subscription
           ws.send(JSON.stringify({ type: 'subscribed', assignmentId: subscribedRoom }));
         }
       } catch {
-        // Ignore malformed messages
+        // ignore malformed messages
       }
     });
 
@@ -115,8 +101,6 @@ async function start(): Promise<void> {
     console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
   });
 }
-
-// ─── Handle worker events and broadcast to WS clients ─────────────────────────
 
 function handleWorkerEvent(event: PaperEvent): void {
   const { assignmentId } = event;
@@ -145,8 +129,6 @@ function handleWorkerEvent(event: PaperEvent): void {
     setTimeout(() => rooms.delete(assignmentId), 30000);
   }
 }
-
-// ─── Graceful Shutdown ────────────────────────────────────────────────────────
 
 process.on('SIGTERM', () => {
   console.log('SIGTERM received — shutting down gracefully');

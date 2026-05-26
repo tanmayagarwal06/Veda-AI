@@ -1,5 +1,3 @@
-// ─── Domain Types ─────────────────────────────────────────────────────────────
-
 export type AssignmentStatus = 'pending' | 'processing' | 'done' | 'failed';
 
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
@@ -11,8 +9,6 @@ export type QuestionType =
   | 'Diagram/Graph-Based'
   | 'Numerical'
   | 'True/False';
-
-// ─── Request / Response Shapes ────────────────────────────────────────────────
 
 export interface QuestionTypeConfig {
   type: QuestionType;
@@ -27,8 +23,6 @@ export interface CreateAssignmentInput {
   additionalInstructions?: string;
   fileContent?: string; // extracted text from uploaded file
 }
-
-// ─── AI / Generated Paper Types ──────────────────────────────────────────────
 
 export interface GeneratedQuestion {
   text: string;
@@ -46,8 +40,6 @@ export interface PaperSection {
 export interface GeneratedPaperData {
   sections: PaperSection[];
 }
-
-// ─── WebSocket Message Types ───────────────────────────────────────────────────
 
 export interface WSSubscribeMessage {
   type: 'subscribe';
@@ -78,13 +70,9 @@ export type WSOutboundMessage =
   | WSJobCompleteMessage
   | WSJobFailedMessage;
 
-// ─── BullMQ Job Data ───────────────────────────────────────────────────────────
-
 export interface PaperGenerationJobData {
   assignmentId: string;
 }
-
-// ─── API Response Wrapper ─────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
   success: boolean;

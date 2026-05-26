@@ -19,7 +19,6 @@ import { assignmentsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { Assignment } from '@/types/index';
 
-// ─── Stat Card ─────────────────────────────────────────────────────────────────
 function StatCard({
   label,
   value,
@@ -50,7 +49,6 @@ function StatCard({
   );
 }
 
-// ─── Recent Assignment Row ──────────────────────────────────────────────────────
 function RecentRow({ assignment }: { assignment: Assignment }) {
   const statusColor =
     assignment.status === 'done'
@@ -100,7 +98,6 @@ function RecentRow({ assignment }: { assignment: Assignment }) {
   );
 }
 
-// ─── Quick Action Card ──────────────────────────────────────────────────────────
 function QuickAction({
   label,
   description,
@@ -135,7 +132,6 @@ function QuickAction({
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,11 +164,10 @@ export default function HomePage() {
     <MainLayout>
       <div className="p-6 max-w-[1100px] mx-auto space-y-6">
 
-        {/* ── Welcome Banner ── */}
         <div className="relative bg-veda-black rounded-[18px] overflow-hidden px-7 py-6 flex items-center justify-between">
-          {/* Decorative dots */}
+
           <div className="absolute inset-0 bg-dot-pattern bg-dot-md opacity-[0.06]" />
-          {/* Gradient orb */}
+
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-veda-orange/20 blur-3xl" />
 
           <div className="relative z-10">
@@ -197,7 +192,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Assignments"
@@ -229,10 +223,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* ── Bottom Grid (Recent + Quick Actions) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* Recent Assignments — spans 2 cols */}
           <div className="lg:col-span-2 bg-white rounded-[14px] border border-veda-gray-200 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-veda-gray-100">
               <div className="flex items-center gap-2">
@@ -277,7 +269,6 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Quick Actions — 1 col */}
           <div className="space-y-4">
             <h2 className="text-[14px] font-bold text-veda-gray-900 flex items-center gap-2">
               <Zap className="w-4 h-4 text-veda-orange" strokeWidth={2} />
@@ -314,7 +305,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── AI Toolkit Spotlight ── */}
         <div className="bg-white rounded-[14px] border border-veda-gray-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-veda-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">

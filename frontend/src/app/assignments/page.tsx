@@ -11,7 +11,6 @@ import { assignmentsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { Assignment } from '@/types/index';
 
-// ─── Skeleton Card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div className="bg-white rounded-[12px] border border-veda-gray-200 p-4 animate-pulse">
@@ -79,7 +78,6 @@ export default function AssignmentsPage() {
   return (
     <MainLayout>
       <div className="p-6 max-w-[1100px] mx-auto">
-        {/* ── Page Header ── */}
         <div className="mb-6">
           <h1 className="text-[22px] font-bold text-veda-gray-900 tracking-tight mb-1">
             Assignments
@@ -88,17 +86,12 @@ export default function AssignmentsPage() {
             Manage and create assignments for your students
           </p>
         </div>
-
-        {/* ── Toolbar ── */}
         {!loading && assignments.length > 0 && (
           <div className="flex items-center gap-3 mb-5">
-            {/* Filter button */}
             <button className="flex items-center gap-2 px-3.5 py-2 rounded-[8px] border border-veda-gray-200 bg-white text-[12.5px] font-medium text-veda-gray-600 hover:border-veda-gray-300 hover:bg-veda-gray-50 transition-all duration-150">
               <SlidersHorizontal className="w-3.5 h-3.5" />
               Filter By
             </button>
-
-            {/* Search */}
             <div className="flex-1 relative max-w-[320px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-veda-gray-400" />
               <input
@@ -114,16 +107,12 @@ export default function AssignmentsPage() {
                 )}
               />
             </div>
-
-            {/* Refresh */}
             <button
               onClick={loadAssignments}
               className="w-8 h-8 rounded-[8px] border border-veda-gray-200 bg-white flex items-center justify-center text-veda-gray-400 hover:text-veda-gray-700 hover:bg-veda-gray-50 transition-all duration-150"
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
-
-            {/* Create button (right) */}
             <div className="ml-auto">
               <Link
                 href="/create"
@@ -135,8 +124,6 @@ export default function AssignmentsPage() {
             </div>
           </div>
         )}
-
-        {/* ── Error state ── */}
         {error && !loading && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-[10px] text-red-700 text-[13px] mb-5">
             {error}{' '}
@@ -145,8 +132,6 @@ export default function AssignmentsPage() {
             </button>
           </div>
         )}
-
-        {/* ── Loading skeletons ── */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -154,15 +139,11 @@ export default function AssignmentsPage() {
             ))}
           </div>
         )}
-
-        {/* ── Empty state ── */}
         {!loading && assignments.length === 0 && !error && (
           <div className="flex items-center justify-center min-h-[400px]">
             <EmptyState />
           </div>
         )}
-
-        {/* ── Assignments grid ── */}
         {!loading && filtered.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
             {filtered.map((assignment) => (
@@ -182,15 +163,11 @@ export default function AssignmentsPage() {
             ))}
           </div>
         )}
-
-        {/* ── No search results ── */}
         {!loading && assignments.length > 0 && filtered.length === 0 && (
           <div className="text-center py-16 text-veda-gray-400 text-[13.5px]">
             No assignments match &quot;{search}&quot;
           </div>
         )}
-
-        {/* ── Bottom FAB for create (mobile) ── */}
         <Link
           href="/create"
           className="fixed bottom-6 right-6 md:hidden w-12 h-12 bg-veda-black rounded-full flex items-center justify-center shadow-float hover:bg-[#2A2A2A] transition-all active:scale-95"

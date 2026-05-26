@@ -13,7 +13,6 @@ import { assignmentsApi } from '@/lib/api';
 import { AssignmentFormSchema } from '@/lib/validations';
 import { cn } from '@/lib/utils';
 
-// ─── Step indicator ────────────────────────────────────────────────────────────
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -34,7 +33,6 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
   );
 }
 
-// ─── Generating overlay ────────────────────────────────────────────────────────
 function GeneratingOverlay({ progress, message }: { progress: number; message: string }) {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -63,9 +61,6 @@ function GeneratingOverlay({ progress, message }: { progress: number; message: s
   );
 }
 
-// ─── WebSocket listener — only rendered once assignmentId exists ───────────────
-// Keeping this as a separate component prevents the parent from re-rendering
-// due to WebSocket state changes, which caused the infinite loop.
 function WsListener({
   assignmentId,
   onComplete,
@@ -87,7 +82,6 @@ function WsListener({
   return null;
 }
 
-// ─── Main page ─────────────────────────────────────────────────────────────────
 export default function CreatePage() {
   const router = useRouter();
   const store = useAssignmentStore();
@@ -113,7 +107,6 @@ export default function CreatePage() {
     alert(`Generation failed: ${error}`);
   }, []);
 
-  // ── Step 1 validation ────────────────────────────────────────────────────────
   const validateStep1 = (): boolean => {
     const errs: Record<string, string> = {};
     if (!store.subject.trim()) errs.subject = 'Subject is required';
@@ -122,7 +115,6 @@ export default function CreatePage() {
     return Object.keys(errs).length === 0;
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     // Validate using store data which still includes `id` (required by the schema).
     // The schema's QuestionTypeConfigSchema has `id: z.string()` — we keep it here
@@ -183,7 +175,6 @@ export default function CreatePage() {
 
   return (
     <MainLayout>
-      {/* WebSocket — only mount after assignmentId is set */}
       {assignmentId && (
         <WsListener
           assignmentId={assignmentId}
@@ -191,14 +182,11 @@ export default function CreatePage() {
           onFailed={handleWsFailed}
         />
       )}
-
-      {/* Generating overlay */}
       {submitting && assignmentId && (
         <GeneratingOverlay progress={progress} message={progressMessage} />
       )}
 
       <div className="max-w-[680px] mx-auto px-6 py-8">
-        {/* ── Page header ── */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -213,8 +201,6 @@ export default function CreatePage() {
           </div>
           <div className="h-px bg-veda-gray-200" />
         </div>
-
-        {/* ── Step 1: Basic Info + File ── */}
         {store.currentStep === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div>
@@ -231,8 +217,6 @@ export default function CreatePage() {
               onFile={store.setFileContent}
               onClear={store.clearFile}
             />
-
-            {/* Subject */}
             <div>
               <label className="block text-[12.5px] font-semibold text-veda-gray-700 mb-1.5">
                 Subject <span className="text-veda-orange">*</span>
@@ -258,8 +242,6 @@ export default function CreatePage() {
                 </p>
               )}
             </div>
-
-            {/* Due Date */}
             <div>
               <label className="block text-[12.5px] font-semibold text-veda-gray-700 mb-1.5">
                 Due Date <span className="text-veda-orange">*</span>
@@ -289,8 +271,6 @@ export default function CreatePage() {
             </div>
           </div>
         )}
-
-        {/* ── Step 2: Question Types + Instructions ── */}
         {store.currentStep === 2 && (
           <div className="space-y-5 animate-fade-in">
             <div>
@@ -343,8 +323,6 @@ export default function CreatePage() {
                 Add Question Type
               </button>
             </div>
-
-            {/* Totals */}
             <div className="flex items-center justify-end gap-6 py-3 px-4 bg-veda-gray-50 rounded-[10px] border border-veda-gray-200">
               <div className="text-right">
                 <span className="text-[11px] text-veda-gray-400 block font-medium uppercase tracking-wide">Total Questions</span>
@@ -356,8 +334,6 @@ export default function CreatePage() {
                 <span className="text-[15px] font-bold text-veda-orange tabular-nums">{totalM}</span>
               </div>
             </div>
-
-            {/* Additional instructions */}
             <div>
               <label className="block text-[12.5px] font-semibold text-veda-gray-700 mb-1.5">
                 Additional Information{' '}
@@ -381,8 +357,6 @@ export default function CreatePage() {
             </div>
           </div>
         )}
-
-        {/* ── Navigation ── */}
         <div className="flex items-center justify-between mt-8 pt-5 border-t border-veda-gray-200">
           <button
             type="button"

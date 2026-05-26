@@ -1,4 +1,3 @@
-// ─── Domain Types ──────────────────────────────────────────────────────────────
 
 export type AssignmentStatus = 'pending' | 'processing' | 'done' | 'failed';
 
@@ -11,8 +10,6 @@ export type QuestionType =
   | 'Diagram/Graph-Based'
   | 'Numerical'
   | 'True/False';
-
-// ─── Form / Store Types ────────────────────────────────────────────────────────
 
 export interface QuestionTypeConfig {
   id: string; // client-side unique ID for list key
@@ -29,8 +26,6 @@ export interface AssignmentFormData {
   fileContent?: string;
   fileName?: string;
 }
-
-// ─── API Response Types ────────────────────────────────────────────────────────
 
 export interface Assignment {
   _id: string;
@@ -69,8 +64,6 @@ export interface GeneratedPaper {
   totalMarks?: number;
 }
 
-// ─── WebSocket Message Types ───────────────────────────────────────────────────
-
 export interface WSJobProgressMessage {
   type: 'job:progress';
   assignmentId: string;
@@ -95,8 +88,6 @@ export type WSMessage =
   | WSJobCompleteMessage
   | WSJobFailedMessage
   | { type: 'subscribed'; assignmentId: string };
-
-// ─── Zod schema base types (for inference) ────────────────────────────────────
 
 export interface ApiResponse<T> {
   success: boolean;

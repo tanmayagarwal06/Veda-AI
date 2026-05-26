@@ -28,7 +28,7 @@ export function Header() {
 
   return (
     <header className="h-[52px] bg-white border-b border-veda-gray-200 flex items-center justify-between px-6 shrink-0 z-30">
-      {/* Left: Breadcrumb */}
+
       <div className="flex items-center gap-1.5 text-[13px]">
         {crumb.back ? (
           <Link
@@ -43,9 +43,8 @@ export function Header() {
         )}
       </div>
 
-      {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        {/* Notification bell */}
+
         <button
           className={cn(
             'relative w-8 h-8 rounded-[8px] flex items-center justify-center',
@@ -58,7 +57,6 @@ export function Header() {
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-veda-orange rounded-full ring-2 ring-white" />
         </button>
 
-        {/* User avatar + name */}
         <button className="flex items-center gap-2 px-2 py-1.5 rounded-[8px] hover:bg-veda-gray-100 transition-all duration-150 active:scale-95">
           <div className="w-6 h-6 rounded-full bg-gradient-veda flex items-center justify-center shrink-0">
             <span className="text-white text-[10px] font-bold">R</span>

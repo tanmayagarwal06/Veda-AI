@@ -73,7 +73,6 @@ export function FileUpload({ fileName, onFile, onClear }: FileUploadProps) {
     >
       <input {...getInputProps()} />
 
-      {/* Upload icon */}
       <div
         className={cn(
           'w-12 h-12 rounded-[12px] flex items-center justify-center transition-colors',

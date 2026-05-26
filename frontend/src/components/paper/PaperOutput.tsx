@@ -12,7 +12,6 @@ interface PaperOutputProps {
   onRegenerate: () => void;
 }
 
-// ─── Difficulty Badge ──────────────────────────────────────────────────────────
 function DifficultyBadge({ difficulty }: { difficulty: GeneratedQuestion['difficulty'] }) {
   const cfg = DIFFICULTY_CONFIG[difficulty];
   return (
@@ -31,7 +30,6 @@ function DifficultyBadge({ difficulty }: { difficulty: GeneratedQuestion['diffic
   );
 }
 
-// ─── Question Item ─────────────────────────────────────────────────────────────
 function QuestionItem({ question, number }: { question: GeneratedQuestion; number: number }) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-veda-gray-100 last:border-b-0">
@@ -51,7 +49,6 @@ function QuestionItem({ question, number }: { question: GeneratedQuestion; numbe
   );
 }
 
-// ─── Section Block ─────────────────────────────────────────────────────────────
 function SectionBlock({
   section,
   index,
@@ -86,7 +83,6 @@ function SectionBlock({
   );
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
 export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProps) {
   const paperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -97,7 +93,7 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
   );
   const totalQuestions = paper.sections.reduce((sum, s) => sum + s.questions.length, 0);
 
-  // ── Download — fetch as blob so Content-Disposition triggers real file download ─
+  // fetch as blob so Content-Disposition: attachment triggers a real file download
   const handleDownload = async () => {
     if (downloading) return;
     setDownloading(true);
@@ -125,7 +121,6 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
 
   return (
     <div className="max-w-[820px] mx-auto px-6 pb-12">
-      {/* ── AI Message Bubble ── */}
       <div className="mb-6 p-4 bg-veda-orange-light border border-veda-orange/20 rounded-[12px] flex items-start gap-3">
         <div className="w-8 h-8 rounded-full bg-gradient-veda flex items-center justify-center shrink-0 shadow-sm">
           <span className="text-white text-[11px] font-bold">AI</span>
@@ -158,10 +153,7 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
           {downloading ? 'Generating…' : 'Download as PDF'}
         </button>
       </div>
-
-      {/* ── Exam Paper ── */}
       <div ref={paperRef} className="bg-white rounded-[16px] border border-veda-gray-200 shadow-card overflow-hidden">
-        {/* Paper header */}
         <div className="px-8 pt-8 pb-6 text-center border-b border-veda-gray-200">
           <h1 className="text-[20px] font-bold text-veda-gray-900 mb-1 font-serif">
             Delhi Public School, Sector-4, Bokaro
@@ -171,8 +163,6 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
           </p>
           <p className="text-[13px] text-veda-gray-500">Class: 8th</p>
         </div>
-
-        {/* Meta row */}
         <div className="px-8 py-4 flex items-center justify-between border-b border-veda-gray-100 bg-veda-gray-50/50">
           <div className="flex items-center gap-6">
             <div>
@@ -199,15 +189,11 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
             </p>
           </div>
         </div>
-
-        {/* Instructions */}
         <div className="px-8 py-3 bg-veda-gray-50/30 border-b border-veda-gray-100">
           <p className="text-[12px] italic text-veda-gray-500">
             All questions are compulsory unless stated otherwise.
           </p>
         </div>
-
-        {/* ── Student info — typeable input fields ── */}
         <div className="px-8 py-5 border-b border-veda-gray-200">
           <div className="flex items-end gap-8">
             <div className="flex-1">
@@ -248,8 +234,6 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
             </div>
           </div>
         </div>
-
-        {/* Sections */}
         <div className="px-8 pt-6">
           {paper.sections.map((section, i) => {
             const offset = runningOffset;
@@ -259,14 +243,10 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
             );
           })}
         </div>
-
-        {/* Footer */}
         <div className="px-8 py-5 border-t border-veda-gray-200 text-center">
           <p className="text-[11px] text-veda-gray-400 italic">— End of Question Paper —</p>
         </div>
       </div>
-
-      {/* ── Action buttons ── */}
       <div className="flex items-center justify-between mt-6">
         <button
           onClick={onRegenerate}

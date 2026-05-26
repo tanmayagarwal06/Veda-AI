@@ -15,7 +15,6 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { cn } from '@/lib/utils';
 
-// ─── Section header ────────────────────────────────────────────────────────────
 function SectionHeader({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
   return (
     <div className="flex items-start gap-3 mb-5">
@@ -30,7 +29,6 @@ function SectionHeader({ icon: Icon, title, description }: { icon: React.Element
   );
 }
 
-// ─── Setting row ───────────────────────────────────────────────────────────────
 function SettingRow({ label, description, children }: { label: string; description?: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-3.5 border-b border-veda-gray-100 last:border-0 gap-6">
@@ -43,7 +41,6 @@ function SettingRow({ label, description, children }: { label: string; descripti
   );
 }
 
-// ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
@@ -63,7 +60,6 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-// ─── Input ────────────────────────────────────────────────────────────────────
 function SettingInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <input
@@ -75,7 +71,6 @@ function SettingInput({ value, onChange, placeholder }: { value: string; onChang
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   // Profile state
   const [schoolName, setSchoolName] = useState('Delhi Public School');
@@ -104,7 +99,6 @@ export default function SettingsPage() {
     <MainLayout>
       <div className="p-6 max-w-[780px] mx-auto">
 
-        {/* Page header */}
         <div className="mb-8">
           <h1 className="text-[22px] font-bold text-veda-gray-900 tracking-tight mb-1">Settings</h1>
           <p className="text-[13.5px] text-veda-gray-500">Manage your profile, preferences, and account</p>
@@ -112,7 +106,6 @@ export default function SettingsPage() {
 
         <div className="space-y-6">
 
-          {/* ── Profile ── */}
           <div className="bg-white rounded-[16px] border border-veda-gray-200 p-6">
             <SectionHeader icon={School} title="School Profile" description="Your institution's details shown on generated papers" />
 
@@ -132,12 +125,11 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ── AI Preferences ── */}
           <div className="bg-white rounded-[16px] border border-veda-gray-200 p-6">
             <SectionHeader icon={Sparkles} title="AI Preferences" description="Control how VedaAI generates your exam papers" />
 
             <div className="space-y-0">
-              {/* Provider picker */}
+
               <SettingRow label="AI Provider" description="Choose which AI model powers paper generation">
                 <div className="flex items-center gap-2">
                   {[
@@ -161,7 +153,6 @@ export default function SettingsPage() {
                 </div>
               </SettingRow>
 
-              {/* Difficulty mix */}
               <SettingRow label="Default Difficulty Mix" description="How questions are distributed by difficulty">
                 <div className="flex items-center gap-2">
                   {[
@@ -187,7 +178,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ── Notifications ── */}
           <div className="bg-white rounded-[16px] border border-veda-gray-200 p-6">
             <SectionHeader icon={Bell} title="Notifications" description="Control what VedaAI notifies you about" />
 
@@ -204,7 +194,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ── Account ── */}
           <div className="bg-white rounded-[16px] border border-veda-gray-200 p-6">
             <SectionHeader icon={Shield} title="Account & Security" description="Manage account security settings" />
 
@@ -227,7 +216,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ── Appearance ── */}
           <div className="bg-white rounded-[16px] border border-veda-gray-200 p-6">
             <SectionHeader icon={Palette} title="Appearance" description="Customise how VedaAI looks" />
             <div className="flex items-center gap-3 py-2">
@@ -245,7 +233,6 @@ export default function SettingsPage() {
 
         </div>
 
-        {/* Save Button */}
         <div className="flex items-center justify-between mt-8 pt-5 border-t border-veda-gray-200">
           <p className="text-[12px] text-veda-gray-400">Changes are applied immediately after saving.</p>
           <button

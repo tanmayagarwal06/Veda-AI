@@ -11,8 +11,6 @@ import { useSocketStore } from '@/store/socketStore';
 import { usePaperStore } from '@/store/paperStore';
 import { assignmentsApi, papersApi } from '@/lib/api';
 
-
-// ─── Processing State ──────────────────────────────────────────────────────────
 function ProcessingState({ progress, message }: { progress: number; message: string }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[500px] px-8">
@@ -46,7 +44,6 @@ function ProcessingState({ progress, message }: { progress: number; message: str
   );
 }
 
-// ─── Error State ───────────────────────────────────────────────────────────────
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] px-8">
@@ -65,7 +62,6 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
-// ─── 404 State ────────────────────────────────────────────────────────────────
 function NotFoundState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] px-8 text-center">
@@ -86,7 +82,6 @@ function NotFoundState() {
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function PaperPage() {
   const params = useParams();
   const router = useRouter();
@@ -100,7 +95,6 @@ export default function PaperPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
-  // Load assignment + paper data
   const loadData = useCallback(async () => {
     try {
       setErrorMsg(null);
@@ -187,7 +181,6 @@ export default function PaperPage() {
   return (
     <MainLayout>
       <div className="min-h-full">
-        {/* Initial loading spinner */}
         {initialLoading && (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-3 text-veda-gray-500">
@@ -196,24 +189,16 @@ export default function PaperPage() {
             </div>
           </div>
         )}
-
-        {/* 404 — invalid ID */}
         {!initialLoading && notFound && <NotFoundState />}
-
-        {/* Waiting for AI to generate */}
         {!initialLoading && !notFound && waitingForWs && (
           <ProcessingState
             progress={socketStore.progress}
             message={socketStore.progressMessage}
           />
         )}
-
-        {/* Generation failed */}
         {!initialLoading && !notFound && !waitingForWs && errorMsg && (
           <ErrorState message={errorMsg} onRetry={handleRegenerate} />
         )}
-
-        {/* Paper output */}
         {!initialLoading && !notFound && !waitingForWs && !errorMsg && paperStore.paper && paperStore.assignment && (
           <div className="pt-6 animate-fade-in">
             <PaperOutput

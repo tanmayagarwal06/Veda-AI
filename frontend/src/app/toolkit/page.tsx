@@ -15,7 +15,6 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { cn } from '@/lib/utils';
 
-// ─── Tool definition ───────────────────────────────────────────────────────────
 interface Tool {
   id: string;
   label: string;
@@ -97,7 +96,6 @@ const TOOLS: Tool[] = [
   },
 ];
 
-// ─── Tool Card ─────────────────────────────────────────────────────────────────
 function ToolCard({ tool }: { tool: Tool }) {
   const Icon = tool.icon;
 
@@ -110,7 +108,7 @@ function ToolCard({ tool }: { tool: Tool }) {
           : 'opacity-75'
       )}
     >
-      {/* Icon + badge row */}
+
       <div className="flex items-start justify-between">
         <div className={cn('w-12 h-12 rounded-[12px] flex items-center justify-center', tool.bg)}>
           <Icon className={cn('w-5.5 h-5.5', tool.color)} strokeWidth={1.8} />
@@ -127,7 +125,6 @@ function ToolCard({ tool }: { tool: Tool }) {
         </span>
       </div>
 
-      {/* Text */}
       <div className="flex-1">
         <h3 className={cn('text-[14px] font-bold mb-1.5', tool.available ? 'text-veda-gray-900 group-hover:text-veda-orange transition-colors' : 'text-veda-gray-600')}>
           {tool.label}
@@ -135,7 +132,6 @@ function ToolCard({ tool }: { tool: Tool }) {
         <p className="text-[12.5px] text-veda-gray-500 leading-relaxed">{tool.description}</p>
       </div>
 
-      {/* CTA */}
       <div className="pt-2 border-t border-veda-gray-100">
         {tool.available ? (
           <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-veda-orange group-hover:gap-2.5 transition-all">
@@ -157,7 +153,6 @@ function ToolCard({ tool }: { tool: Tool }) {
   return <div className="h-full">{inner}</div>;
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function ToolkitPage() {
   const available = TOOLS.filter((t) => t.available);
   const upcoming = TOOLS.filter((t) => !t.available);
@@ -166,7 +161,6 @@ export default function ToolkitPage() {
     <MainLayout>
       <div className="p-6 max-w-[1100px] mx-auto">
 
-        {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-8 h-8 rounded-[8px] bg-veda-orange-light flex items-center justify-center">
@@ -179,7 +173,6 @@ export default function ToolkitPage() {
           </p>
         </div>
 
-        {/* Available Tools */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -192,7 +185,6 @@ export default function ToolkitPage() {
           </div>
         </div>
 
-        {/* Coming Soon */}
         <div>
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-veda-gray-300" />
@@ -205,7 +197,6 @@ export default function ToolkitPage() {
           </div>
         </div>
 
-        {/* Bottom banner */}
         <div className="mt-8 bg-veda-black rounded-[16px] px-7 py-6 flex items-center justify-between relative overflow-hidden">
           <div className="absolute inset-0 bg-dot-pattern bg-dot-md opacity-[0.06]" />
           <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-veda-orange/20 blur-3xl" />

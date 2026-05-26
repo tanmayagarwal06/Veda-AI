@@ -5,8 +5,6 @@ import { GeneratedPaper } from '../models/GeneratedPaper';
 import { paperQueue } from '../config/redis';
 import type { ApiResponse } from '../types/index';
 
-// ─── Validation Schema ────────────────────────────────────────────────────────
-
 const QuestionTypeConfigSchema = z.object({
   type: z.enum(['MCQ', 'Short Answer', 'Long Answer', 'Diagram/Graph-Based', 'Numerical', 'True/False']),
   numberOfQuestions: z.number().int().min(1, 'Must have at least 1 question'),
@@ -30,8 +28,6 @@ const CreateAssignmentSchema = z.object({
   fileContent: z.string().max(50000).optional(),
 });
 
-// ─── POST /api/assignments ────────────────────────────────────────────────────
-
 export async function createAssignment(
   req: Request,
   res: Response,
@@ -49,7 +45,6 @@ export async function createAssignment(
 
     const input = parseResult.data;
 
-    // Create assignment in DB
     const assignment = await Assignment.create({
       subject: input.subject,
       dueDate: new Date(input.dueDate),
@@ -59,7 +54,6 @@ export async function createAssignment(
       status: 'pending',
     });
 
-    // Enqueue paper generation job
     await paperQueue.add(
       'generate-paper',
       { assignmentId: assignment._id.toString() },
@@ -80,8 +74,6 @@ export async function createAssignment(
     next(error);
   }
 }
-
-// ─── GET /api/assignments/:id ─────────────────────────────────────────────────
 
 export async function getAssignment(
   req: Request,
@@ -120,8 +112,6 @@ export async function getAssignment(
   }
 }
 
-// ─── GET /api/assignments ─────────────────────────────────────────────────────
-
 export async function listAssignments(
   req: Request,
   res: Response,
@@ -158,8 +148,6 @@ export async function listAssignments(
   }
 }
 
-// ─── DELETE /api/assignments/:id ──────────────────────────────────────────────
-
 export async function deleteAssignment(
   req: Request,
   res: Response,
@@ -189,8 +177,6 @@ export async function deleteAssignment(
   }
 }
 
-// ─── POST /api/assignments/:id/regenerate ─────────────────────────────────────
-
 export async function regenerateAssignment(
   req: Request,
   res: Response,
@@ -208,14 +194,11 @@ export async function regenerateAssignment(
       return;
     }
 
-    // Delete existing paper
     await GeneratedPaper.deleteOne({ assignmentId: id });
 
-    // Reset status
     assignment.status = 'pending';
     await assignment.save();
 
-    // Re-enqueue
     const jobId = `regenerate-${id}-${Date.now()}`;
     await paperQueue.add('generate-paper', { assignmentId: id }, { jobId });
 

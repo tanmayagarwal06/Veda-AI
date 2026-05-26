@@ -1,7 +1,3 @@
-/**
- * BullMQ Paper Generation Worker
- * Run this as a separate process: `npm run worker`
- */
 import 'dotenv/config';
 import { Worker, Job } from 'bullmq';
 import { connectDatabase } from '../config/database';
@@ -11,21 +7,16 @@ import { GeneratedPaper } from '../models/GeneratedPaper';
 import { generatePaper } from '../services/claudeService';
 import type { PaperGenerationJobData } from '../types/index';
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
-
 async function bootstrap() {
   await connectDatabase();
   await redisPublisher.connect();
   console.log('🚀 Paper generation worker started');
 }
 
-// ─── Job processor ────────────────────────────────────────────────────────────
-
 async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
   const { assignmentId } = job.data;
   console.log(`[Worker] Processing job ${job.id} for assignment ${assignmentId}`);
 
-  // Mark assignment as processing
   const assignment = await Assignment.findByIdAndUpdate(
     assignmentId,
     { status: 'processing' },
@@ -36,7 +27,6 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
     throw new Error(`Assignment ${assignmentId} not found`);
   }
 
-  // Emit initial progress
   await publishPaperEvent({
     type: 'progress',
     assignmentId,
@@ -46,7 +36,6 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
 
   await job.updateProgress(10);
 
-  // Emit progress: calling Claude
   await publishPaperEvent({
     type: 'progress',
     assignmentId,
@@ -56,7 +45,6 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
 
   await job.updateProgress(30);
 
-  // Generate paper via Claude
   const paperData = await generatePaper(
     assignment.subject,
     assignment.dueDate.toISOString().split('T')[0],
@@ -65,7 +53,6 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
     assignment.fileContent
   );
 
-  // Emit progress: saving
   await publishPaperEvent({
     type: 'progress',
     assignmentId,
@@ -75,19 +62,16 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
 
   await job.updateProgress(80);
 
-  // Save generated paper to DB
   const generatedPaper = await GeneratedPaper.create({
     assignmentId: assignment._id,
     sections: paperData.sections,
     generatedAt: new Date(),
   });
 
-  // Mark assignment as done
   await Assignment.findByIdAndUpdate(assignmentId, { status: 'done' });
 
   await job.updateProgress(100);
 
-  // Emit completion event
   await publishPaperEvent({
     type: 'complete',
     assignmentId,
@@ -98,8 +82,6 @@ async function processJob(job: Job<PaperGenerationJobData>): Promise<void> {
     `[Worker] Job ${job.id} complete — paper ${generatedPaper._id} created`
   );
 }
-
-// ─── Worker instance ──────────────────────────────────────────────────────────
 
 bootstrap().then(() => {
   const worker = new Worker<PaperGenerationJobData>(

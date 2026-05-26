@@ -4,14 +4,13 @@ import type { PaperGenerationJobData } from '../types/index';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
-// ─── Shared Redis connection for BullMQ ───────────────────────────────────────
 export const redisConnection = new IORedis(REDIS_URL, {
-  maxRetriesPerRequest: null, // Required for BullMQ
+  maxRetriesPerRequest: null, // required by BullMQ
   enableReadyCheck: false,
   lazyConnect: true,
 });
 
-// ─── Dedicated pub/sub connections ────────────────────────────────────────────
+// pub/sub needs dedicated connections — a BullMQ connection can't be reused for subscribe
 export const redisPublisher = new IORedis(REDIS_URL, {
   maxRetriesPerRequest: 3,
   lazyConnect: true,
@@ -22,7 +21,6 @@ export const redisSubscriber = new IORedis(REDIS_URL, {
   lazyConnect: true,
 });
 
-// ─── BullMQ Queue ─────────────────────────────────────────────────────────────
 export const paperQueue = new Queue<PaperGenerationJobData>('paper-generation', {
   connection: redisConnection,
   defaultJobOptions: {
@@ -33,7 +31,6 @@ export const paperQueue = new Queue<PaperGenerationJobData>('paper-generation', 
   },
 });
 
-// ─── Redis pub/sub channel helpers ────────────────────────────────────────────
 export const PAPER_EVENTS_CHANNEL = 'paper-events';
 
 export interface PaperEvent {
@@ -50,12 +47,11 @@ export async function publishPaperEvent(event: PaperEvent): Promise<void> {
 }
 
 async function safeConnect(client: IORedis): Promise<void> {
-  // ioredis throws if you call .connect() when already connecting/connected
+  // ioredis throws if you call .connect() when the client is already connecting/connected
   const status = client.status;
   if (status === 'wait' || status === 'close' || status === 'end') {
     await client.connect();
   }
-  // 'connecting', 'connect', 'ready' — already in progress or done, nothing to do
 }
 
 export async function connectRedis(): Promise<void> {

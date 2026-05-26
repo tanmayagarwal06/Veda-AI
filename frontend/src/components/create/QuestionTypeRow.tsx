@@ -32,7 +32,7 @@ export function QuestionTypeRow({
 }: QuestionTypeRowProps) {
   return (
     <div className="flex items-center gap-2 py-2.5 px-3 bg-veda-gray-50 rounded-[10px] border border-veda-gray-200 group hover:border-veda-gray-300 transition-colors">
-      {/* Type dropdown */}
+
       <div className="flex-1 min-w-0">
         <select
           value={config.type}
@@ -47,7 +47,6 @@ export function QuestionTypeRow({
         </select>
       </div>
 
-      {/* Remove button */}
       {showRemove && (
         <button
           type="button"
@@ -58,10 +57,8 @@ export function QuestionTypeRow({
         </button>
       )}
 
-      {/* Divider */}
       <div className="w-px h-4 bg-veda-gray-200 shrink-0" />
 
-      {/* Count controls */}
       <div className="flex items-center gap-1.5 shrink-0">
         <button
           type="button"
@@ -98,10 +95,8 @@ export function QuestionTypeRow({
         </button>
       </div>
 
-      {/* Divider */}
       <div className="w-px h-4 bg-veda-gray-200 shrink-0" />
 
-      {/* Marks */}
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[11px] text-veda-gray-400 font-medium">Marks</span>
         <input
