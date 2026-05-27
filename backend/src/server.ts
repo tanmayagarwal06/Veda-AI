@@ -1,11 +1,15 @@
 import 'dotenv/config';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
+import { Worker, Job } from 'bullmq';
 import app from './app';
 import { connectDatabase } from './config/database';
-import { connectRedis, redisSubscriber, PAPER_EVENTS_CHANNEL } from './config/redis';
+import { connectRedis, redisConnection, redisPublisher, redisSubscriber, PAPER_EVENTS_CHANNEL, publishPaperEvent } from './config/redis';
+import { Assignment } from './models/Assignment';
+import { GeneratedPaper } from './models/GeneratedPaper';
+import { generatePaper } from './services/claudeService';
 import type { PaperEvent } from './config/redis';
-import type { WSOutboundMessage } from './types/index';
+import type { WSOutboundMessage, PaperGenerationJobData } from './types/index';
 
 const PORT = parseInt(process.env.PORT || '4000', 10);
 
@@ -100,6 +104,63 @@ async function start(): Promise<void> {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
   });
+
+  // Start the paper generation worker in the same process
+  await redisPublisher.connect();
+  const worker = new Worker<PaperGenerationJobData>(
+    'paper-generation',
+    async (job: Job<PaperGenerationJobData>) => {
+      const { assignmentId } = job.data;
+      console.log(`[Worker] Processing job ${job.id} for assignment ${assignmentId}`);
+
+      const assignment = await Assignment.findByIdAndUpdate(
+        assignmentId,
+        { status: 'processing' },
+        { new: true }
+      );
+      if (!assignment) throw new Error(`Assignment ${assignmentId} not found`);
+
+      await publishPaperEvent({ type: 'progress', assignmentId, progress: 10, message: 'Preparing prompt...' });
+      await job.updateProgress(10);
+
+      await publishPaperEvent({ type: 'progress', assignmentId, progress: 30, message: 'Generating questions with AI...' });
+      await job.updateProgress(30);
+
+      const paperData = await generatePaper(
+        assignment.subject,
+        assignment.dueDate.toISOString().split('T')[0],
+        assignment.questionTypes,
+        assignment.additionalInstructions,
+        assignment.fileContent
+      );
+
+      await publishPaperEvent({ type: 'progress', assignmentId, progress: 80, message: 'Saving to database...' });
+      await job.updateProgress(80);
+
+      const generatedPaper = await GeneratedPaper.create({
+        assignmentId: assignment._id,
+        sections: paperData.sections,
+        generatedAt: new Date(),
+      });
+
+      await Assignment.findByIdAndUpdate(assignmentId, { status: 'done' });
+      await job.updateProgress(100);
+      await publishPaperEvent({ type: 'complete', assignmentId, paperId: String(generatedPaper._id) });
+      console.log(`[Worker] ✅ Job ${job.id} complete — paper ${generatedPaper._id} created`);
+    },
+    { connection: redisConnection, concurrency: 3 }
+  );
+
+  worker.on('failed', async (job, error) => {
+    console.error(`[Worker] ❌ Job ${job?.id} failed:`, error.message);
+    if (job?.data.assignmentId) {
+      await Assignment.findByIdAndUpdate(job.data.assignmentId, { status: 'failed' }).catch(console.error);
+      await publishPaperEvent({ type: 'failed', assignmentId: job.data.assignmentId, error: error.message }).catch(console.error);
+    }
+  });
+
+  worker.on('error', (error) => console.error('[Worker] error:', error));
+  console.log('⚙️  Paper generation worker started');
 }
 
 function handleWorkerEvent(event: PaperEvent): void {
