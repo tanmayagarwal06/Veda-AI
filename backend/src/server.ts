@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Worker, Job } from 'bullmq';
 import app from './app';
 import { connectDatabase } from './config/database';
-import { connectRedis, redisConnection, redisPublisher, redisSubscriber, PAPER_EVENTS_CHANNEL, publishPaperEvent } from './config/redis';
+import { connectRedis, redisConnection, redisSubscriber, PAPER_EVENTS_CHANNEL, publishPaperEvent } from './config/redis';
 import { Assignment } from './models/Assignment';
 import { GeneratedPaper } from './models/GeneratedPaper';
 import { generatePaper } from './services/claudeService';
@@ -106,7 +106,6 @@ async function start(): Promise<void> {
   });
 
   // Start the paper generation worker in the same process
-  await redisPublisher.connect();
   const worker = new Worker<PaperGenerationJobData>(
     'paper-generation',
     async (job: Job<PaperGenerationJobData>) => {
