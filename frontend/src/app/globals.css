@@ -69,17 +69,67 @@ select {
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
   .no-print {
     display: none !important;
   }
-  body {
-    background: white;
-  }
+
   aside, nav, header {
     display: none !important;
   }
+
+  body {
+    background: white !important;
+    font-size: 11pt;
+  }
+
   main {
     margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove card styling so content flows naturally */
+  .bg-white.rounded-\[16px\] {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Keep section borders */
+  .border-b {
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+
+  /* Don't break questions across pages */
+  .border-b.border-veda-gray-100 {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Don't break sections across pages */
+  .mb-8 {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide input placeholders, show clean underlines */
+  input {
+    border: none !important;
+    border-bottom: 1px solid #333 !important;
+    outline: none !important;
+    background: transparent !important;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  /* Outer wrapper — remove padding/max-width constraints */
+  .max-w-\[820px\] {
+    max-width: 100% !important;
     padding: 0 !important;
   }
 }
