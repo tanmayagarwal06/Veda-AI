@@ -1,9 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Download, RefreshCw, Loader2 } from 'lucide-react';
+import { useRef } from 'react';
+import { Download, RefreshCw } from 'lucide-react';
 import { cn, DIFFICULTY_CONFIG, formatDateLong, getSectionLetter } from '@/lib/utils';
-import { papersApi } from '@/lib/api';
 import type { GeneratedPaper, Assignment, PaperSection, GeneratedQuestion } from '@/types/index';
 
 interface PaperOutputProps {
@@ -85,7 +84,6 @@ function SectionBlock({
 
 export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProps) {
   const paperRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
 
   const totalMarks = paper.sections.reduce(
     (sum, s) => sum + s.questions.reduce((qs, q) => qs + q.marks, 0),
@@ -93,35 +91,15 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
   );
   const totalQuestions = paper.sections.reduce((sum, s) => sum + s.questions.length, 0);
 
-  // fetch as blob so Content-Disposition: attachment triggers a real file download
-  const handleDownload = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    try {
-      const url = papersApi.pdfUrl(paper._id);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`PDF generation failed (${res.status})`);
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = `${assignment.subject.replace(/[^a-zA-Z0-9]+/g, '-')}-exam-paper.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to download PDF');
-    } finally {
-      setDownloading(false);
-    }
+  const handleDownload = () => {
+    window.print();
   };
 
   let runningOffset = 0;
 
   return (
     <div className="max-w-[820px] mx-auto px-6 pb-12">
-      <div className="mb-6 p-4 bg-veda-orange-light border border-veda-orange/20 rounded-[12px] flex items-start gap-3">
+      <div className="no-print mb-6 p-4 bg-veda-orange-light border border-veda-orange/20 rounded-[12px] flex items-start gap-3">
         <div className="w-8 h-8 rounded-full bg-gradient-veda flex items-center justify-center shrink-0 shadow-sm">
           <span className="text-white text-[11px] font-bold">AI</span>
         </div>
@@ -136,21 +114,15 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
         </div>
         <button
           onClick={handleDownload}
-          disabled={downloading}
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-[8px] text-[12.5px] font-medium shrink-0',
             'bg-white border border-veda-gray-200 text-veda-gray-700',
             'hover:border-veda-orange/50 hover:text-veda-orange hover:bg-veda-orange-light/50',
-            'transition-all duration-150 active:scale-[0.97] shadow-sm',
-            'disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100'
+            'transition-all duration-150 active:scale-[0.97] shadow-sm'
           )}
         >
-          {downloading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Download className="w-3.5 h-3.5" />
-          )}
-          {downloading ? 'Generating…' : 'Download as PDF'}
+          <Download className="w-3.5 h-3.5" />
+          Download as PDF
         </button>
       </div>
       <div ref={paperRef} className="bg-white rounded-[16px] border border-veda-gray-200 shadow-card overflow-hidden">
@@ -247,7 +219,7 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
           <p className="text-[11px] text-veda-gray-400 italic">— End of Question Paper —</p>
         </div>
       </div>
-      <div className="flex items-center justify-between mt-6">
+      <div className="no-print flex items-center justify-between mt-6">
         <button
           onClick={onRegenerate}
           className={cn(
@@ -262,16 +234,14 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
         </button>
         <button
           onClick={handleDownload}
-          disabled={downloading}
           className={cn(
             'flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-[13px] font-medium',
             'bg-veda-black text-white',
-            'hover:bg-[#2A2A2A] transition-all duration-150 active:scale-[0.97] shadow-sm',
-            'disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100'
+            'hover:bg-[#2A2A2A] transition-all duration-150 active:scale-[0.97] shadow-sm'
           )}
         >
-          {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          {downloading ? 'Generating PDF…' : 'Download as PDF'}
+          <Download className="w-4 h-4" />
+          Download as PDF
         </button>
       </div>
     </div>

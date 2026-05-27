@@ -68,12 +68,18 @@ select {
   padding-right: 24px;
 }
 
-/* ─── Print styles ───────────────────────────────────────────────────────── */
 @media print {
   .no-print {
     display: none !important;
   }
   body {
     background: white;
+  }
+  aside, nav, header {
+    display: none !important;
+  }
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
