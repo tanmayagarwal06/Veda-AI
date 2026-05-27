@@ -4,21 +4,28 @@ import type { PaperGenerationJobData } from '../types/index';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
+const tlsOptions = REDIS_URL.startsWith('rediss://')
+  ? { tls: { rejectUnauthorized: false } }
+  : {};
+
 export const redisConnection = new IORedis(REDIS_URL, {
   maxRetriesPerRequest: null, // required by BullMQ
   enableReadyCheck: false,
   lazyConnect: true,
+  ...tlsOptions,
 });
 
 // pub/sub needs dedicated connections — a BullMQ connection can't be reused for subscribe
 export const redisPublisher = new IORedis(REDIS_URL, {
   maxRetriesPerRequest: 3,
   lazyConnect: true,
+  ...tlsOptions,
 });
 
 export const redisSubscriber = new IORedis(REDIS_URL, {
   maxRetriesPerRequest: 3,
   lazyConnect: true,
+  ...tlsOptions,
 });
 
 export const paperQueue = new Queue<PaperGenerationJobData>('paper-generation', {
