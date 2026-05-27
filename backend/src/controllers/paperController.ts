@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import { GeneratedPaper } from '../models/GeneratedPaper';
 import { Assignment } from '../models/Assignment';
 import type { ApiResponse, QuestionDifficulty } from '../types/index';
@@ -104,13 +105,15 @@ export async function downloadPdf(
       difficultyLabel
     );
 
+    const isProduction = process.env.NODE_ENV === 'production';
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: isProduction ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: isProduction ? await chromium.executablePath() : undefined,
       headless: true,
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'load' });
 
     const pdf = await page.pdf({
       format: 'A4',
