@@ -29,21 +29,35 @@ function DifficultyBadge({ difficulty }: { difficulty: GeneratedQuestion['diffic
   );
 }
 
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+
 function QuestionItem({ question, number }: { question: GeneratedQuestion; number: number }) {
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-veda-gray-100 last:border-b-0">
-      <span className="text-[13px] font-bold text-veda-gray-900 shrink-0 w-6 mt-0.5 tabular-nums">
-        {number}.
-      </span>
-      <p className="flex-1 text-[13px] text-veda-gray-800 leading-relaxed">
-        {question.text}
-      </p>
-      <div className="flex items-center gap-2 shrink-0 ml-2">
-        <DifficultyBadge difficulty={question.difficulty} />
-        <span className="text-[11px] font-medium text-veda-gray-400 whitespace-nowrap">
-          [{question.marks} mark{question.marks > 1 ? 's' : ''}]
+    <div className="py-3 border-b border-veda-gray-100 last:border-b-0">
+      <div className="flex items-start gap-3">
+        <span className="text-[13px] font-bold text-veda-gray-900 shrink-0 w-6 mt-0.5 tabular-nums">
+          {number}.
         </span>
+        <p className="flex-1 text-[13px] text-veda-gray-800 leading-relaxed">
+          {question.text}
+        </p>
+        <div className="flex items-center gap-2 shrink-0 ml-2">
+          <DifficultyBadge difficulty={question.difficulty} />
+          <span className="text-[11px] font-medium text-veda-gray-400 whitespace-nowrap">
+            [{question.marks} mark{question.marks > 1 ? 's' : ''}]
+          </span>
+        </div>
       </div>
+      {question.options && question.options.length > 0 && (
+        <div className="ml-9 mt-2 grid grid-cols-2 gap-x-6 gap-y-1">
+          {question.options.map((opt, i) => (
+            <div key={i} className="flex items-start gap-1.5 text-[12.5px] text-veda-gray-700">
+              <span className="font-semibold shrink-0 text-veda-gray-500">{OPTION_LABELS[i]}.</span>
+              <span>{opt}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ export interface IGeneratedPaper extends Document {
 const QuestionSchema = new Schema<GeneratedQuestion>(
   {
     text: { type: String, required: true },
+    options: { type: [String], default: undefined },
     difficulty: {
       type: String,
       required: true,

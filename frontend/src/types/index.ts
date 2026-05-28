@@ -43,6 +43,7 @@ export interface Assignment {
 
 export interface GeneratedQuestion {
   text: string;
+  options?: string[];
   difficulty: QuestionDifficulty;
   marks: number;
   type: QuestionType;

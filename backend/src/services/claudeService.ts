@@ -3,6 +3,7 @@ import type { GeneratedPaperData, QuestionTypeConfig } from '../types/index';
 
 const QuestionSchema = z.object({
   text: z.string().min(1),
+  options: z.array(z.string()).length(4).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   marks: z.number().int().positive(),
   type: z.enum(['MCQ', 'Short Answer', 'Long Answer', 'Diagram/Graph-Based', 'Numerical', 'True/False']),
@@ -28,16 +29,27 @@ The JSON must strictly follow this schema:
       "instruction": "Instruction for this section",
       "questions": [
         {
-          "text": "Question text here",
+          "text": "Question text here (do NOT include options in the text)",
+          "options": ["Option text A", "Option text B", "Option text C", "Option text D"],
           "difficulty": "easy",
-          "marks": 2,
+          "marks": 1,
+          "type": "MCQ"
+        },
+        {
+          "text": "Question text here",
+          "difficulty": "medium",
+          "marks": 3,
           "type": "Short Answer"
         }
       ]
     }
   ]
 }
-Rules: difficulty must be exactly "easy", "medium", or "hard". marks must be a positive integer. No answer keys.`;
+Rules:
+- difficulty must be exactly "easy", "medium", or "hard". marks must be a positive integer.
+- For MCQ type: always include "options" — an array of exactly 4 distinct answer choices (plain text, no A/B/C/D prefix). Do NOT embed options inside the question text.
+- For all other types: omit the "options" field entirely.
+- No answer keys.`;
 
 function buildUserPrompt(
   subject: string,
@@ -170,6 +182,14 @@ function generateMock(
     'easy', 'easy', 'medium', 'medium', 'hard',
   ];
 
+  const mockMCQOptions = [
+    ['A fundamental process', 'An unrelated mechanism', 'A secondary effect', 'None of the above'],
+    ['To initiate the reaction', 'To slow down the process', 'To reverse the outcome', 'To measure the result'],
+    ['It increases efficiency', 'It decreases efficiency', 'It has no effect', 'It reverses the process'],
+    ['The primary component', 'A secondary element', 'An external factor', 'An irrelevant variable'],
+    ['Both A and B', 'Neither A nor B', 'Only A', 'Only B'],
+  ];
+
   const mockQuestionTemplates: Record<string, string[]> = {
     MCQ: [
       `Which of the following best describes a key concept in ${subject}?`,
@@ -249,6 +269,7 @@ function generateMock(
           .replace(/\[statement about a core concept in [^\]]+\]/gi, `A fundamental principle of ${subject} is universally applicable`)
           .replace(/\[key fact about [^\]]+\]/gi, `The foundational rule of ${subject}`)
           .replace(/\[statement about[^\]]*\]/gi, `This is a core statement about ${subject}`),
+        ...(qt.type === 'MCQ' ? { options: mockMCQOptions[i % mockMCQOptions.length] } : {}),
         difficulty: difficultyPool[(i + idx) % difficultyPool.length],
         marks: qt.marksPerQuestion,
         type: qt.type,

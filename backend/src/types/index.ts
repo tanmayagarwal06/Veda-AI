@@ -26,6 +26,7 @@ export interface CreateAssignmentInput {
 
 export interface GeneratedQuestion {
   text: string;
+  options?: string[];
   difficulty: QuestionDifficulty;
   marks: number;
   type: QuestionType;
