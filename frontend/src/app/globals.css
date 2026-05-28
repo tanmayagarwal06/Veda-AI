@@ -106,18 +106,15 @@ select {
     overflow: visible !important;
   }
 
-  /* flex-1 can lock items to a fraction of viewport height in a flex column */
-  .flex-1 {
-    flex: none !important;
-    height: auto !important;
-  }
-
   /* Sidebar is hidden but its margin still pushes content 228px right — remove it */
   .ml-\[228px\] {
     margin-left: 0 !important;
   }
 
+  /* Only reset flex on the layout shell, not on content-level elements like question text */
   main {
+    flex: none !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
   }

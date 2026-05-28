@@ -135,7 +135,18 @@ export async function downloadPdf(
   }
 }
 
-const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+const OPT = ['A', 'B', 'C', 'D'];
+const SEC = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+function answerLines(type: string, marks: number): string {
+  if (type === 'MCQ' || type === 'True/False') return '';
+  if (type === 'Diagram/Graph-Based') return '<div class="diagram-box"></div>';
+  const count =
+    type === 'Long Answer' ? Math.max(8, marks * 3) :
+    type === 'Numerical'   ? 5 :
+    Math.max(3, marks * 2);
+  return `<div class="ans-lines">${'<div class="ans-line"></div>'.repeat(count)}</div>`;
+}
 
 function generatePaperHTML(
   subject: string,
@@ -145,47 +156,62 @@ function generatePaperHTML(
   sections: Array<{
     title: string;
     instruction: string;
-    questions: Array<{ text: string; options?: string[]; difficulty: QuestionDifficulty; marks: number; type: string }>;
+    questions: Array<{
+      text: string;
+      options?: string[];
+      difficulty: QuestionDifficulty;
+      marks: number;
+      type: string;
+    }>;
   }>,
   difficultyLabel: (d: QuestionDifficulty) => string
 ): string {
-  let questionNumber = 1;
+  const timeAllowed = Math.ceil(totalQuestions * 2.5);
+  let qNum = 1;
 
-  const sectionsHtml = sections
-    .map((section) => {
-      const questionsHtml = section.questions
-        .map((q) => {
-          const num = questionNumber++;
-          const diffColor = { easy: '#15803d', medium: '#b45309', hard: '#dc2626' }[q.difficulty];
-          const optionsHtml =
-            q.options && q.options.length > 0
-              ? `<div class="options">${q.options
-                  .map((opt, i) => `<div class="option"><span class="opt-label">${OPTION_LABELS[i]}.</span>${opt}</div>`)
-                  .join('')}</div>`
-              : '';
-          return `
-          <div class="question">
-            <span class="q-num">${num}.</span>
-            <div class="q-body">
-              <span class="q-text">${q.text}</span>
-              ${optionsHtml}
-            </div>
-            <span class="q-meta">
-              <span class="diff-badge" style="color: ${diffColor}">[${difficultyLabel(q.difficulty)}]</span>
-              <span class="marks-badge">[${q.marks} Mark${q.marks > 1 ? 's' : ''}]</span>
-            </span>
-          </div>`;
-        })
-        .join('');
+  const sectionsHtml = sections.map((sec, si) => {
+    const letter = SEC[si] ?? String(si + 1);
+    const qs = sec.questions.map((q) => {
+      const n = qNum++;
+      const diffCls =
+        q.difficulty === 'easy' ? 'diff-easy' :
+        q.difficulty === 'hard' ? 'diff-hard' : 'diff-med';
+
+      const optHtml = q.options && q.options.length > 0
+        ? `<div class="options">${q.options.map((o, i) =>
+            `<div class="opt"><span class="opt-key">${OPT[i]}.</span><span>${o}</span></div>`
+          ).join('')}</div>`
+        : '';
+
+      const ansHtml = answerLines(q.type, q.marks);
 
       return `
-      <div class="section">
-        <div class="section-header">${section.title}</div>
-        <div class="section-instruction">${section.instruction}</div>
-        <div class="questions">${questionsHtml}</div>
+      <div class="question">
+        <span class="q-num">${n}.</span>
+        <div class="q-body">
+          <span class="q-text">${q.text}</span>
+          ${optHtml}
+          ${ansHtml}
+        </div>
+        <span class="q-meta">
+          <span class="${diffCls}">${difficultyLabel(q.difficulty)}</span><br/>
+          <span class="marks">[${q.marks} mark${q.marks > 1 ? 's' : ''}]</span>
+        </span>
       </div>`;
-    })
-    .join('');
+    }).join('');
+
+    return `
+    <div class="section">
+      <div class="sec-header-row">
+        <div class="sec-line"></div>
+        <div class="sec-badge">SECTION ${letter}</div>
+        <div class="sec-line"></div>
+      </div>
+      <div class="sec-title">${sec.title}</div>
+      <div class="sec-instr">${sec.instruction}</div>
+      ${qs}
+    </div>`;
+  }).join('');
 
   return `<!DOCTYPE html>
 <html>
@@ -193,56 +219,123 @@ function generatePaperHTML(
 <meta charset="UTF-8"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #1a1a1a; line-height: 1.6; }
-  .header { text-align: center; padding-bottom: 12px; border-bottom: 2px solid #1a1a1a; margin-bottom: 16px; }
-  .header h1 { font-size: 16pt; font-weight: bold; }
-  .header h2 { font-size: 13pt; font-weight: normal; margin-top: 4px; }
-  .meta-row { display: flex; justify-content: space-between; font-size: 11pt; margin: 12px 0; }
-  .instructions { font-size: 11pt; font-style: italic; margin-bottom: 16px; padding: 8px 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-  .student-info { margin-bottom: 20px; }
-  .student-info table { width: 100%; border-collapse: collapse; }
-  .student-info td { padding: 6px 8px; border-bottom: 1px solid #999; font-size: 11pt; width: 33%; }
-  .student-info td span { display: inline-block; width: 140px; border-bottom: 1px solid #333; }
-  .section { margin-bottom: 24px; }
-  .section-header { text-align: center; font-size: 13pt; font-weight: bold; padding: 8px; border: 1px solid #1a1a1a; margin-bottom: 8px; }
-  .section-instruction { font-size: 10.5pt; font-style: italic; margin-bottom: 12px; color: #444; }
-  .question { display: flex; gap: 8px; margin-bottom: 14px; font-size: 11.5pt; align-items: flex-start; page-break-inside: avoid; }
-  .q-num { font-weight: bold; min-width: 24px; padding-top: 1px; }
-  .q-body { flex: 1; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11.5pt;
+    color: #111;
+    line-height: 1.55;
+  }
+
+  /* ── Header ── */
+  .hdr { text-align: center; padding-bottom: 10px; border-bottom: 2.5px double #111; margin-bottom: 12px; }
+  .hdr h1 { font-size: 17pt; font-weight: bold; letter-spacing: .3px; }
+  .hdr h2 { font-size: 11.5pt; font-weight: normal; margin-top: 3px; color: #333; }
+
+  /* ── Meta info ── */
+  .meta { width: 100%; border-collapse: collapse; margin: 8px 0 10px; font-size: 11pt; }
+  .meta td { padding: 2px 4px; }
+  .meta .lbl { font-weight: bold; }
+  .meta .right { text-align: right; }
+  .meta .center { text-align: center; }
+
+  /* ── General instructions ── */
+  .instruct {
+    font-size: 10.5pt; font-style: italic; color: #444;
+    padding: 5px 0; border-top: 1px solid #bbb; border-bottom: 1px solid #bbb;
+    margin-bottom: 12px;
+  }
+
+  /* ── Student info ── */
+  .stu-row { display: flex; gap: 20px; margin-bottom: 18px; }
+  .stu-field { flex: 1; }
+  .stu-label { font-size: 10pt; font-weight: bold; margin-bottom: 3px; }
+  .stu-line { border-bottom: 1.5px solid #333; min-height: 20px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 22px; }
+  .sec-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .sec-line { flex: 1; height: 1px; background: #999; }
+  .sec-badge {
+    font-size: 10.5pt; font-weight: bold; letter-spacing: 1.2px;
+    border: 1.5px solid #555; padding: 2px 14px;
+  }
+  .sec-title { text-align: center; font-size: 12pt; font-weight: bold; margin-bottom: 2px; }
+  .sec-instr { text-align: center; font-size: 10pt; font-style: italic; color: #555; margin-bottom: 10px; }
+
+  /* ── Questions ── */
+  .question {
+    display: flex; gap: 8px; margin-bottom: 13px;
+    page-break-inside: avoid; align-items: flex-start;
+  }
+  .q-num { font-weight: bold; min-width: 26px; flex-shrink: 0; padding-top: 1px; }
+  .q-body { flex: 1; min-width: 0; }
   .q-text { display: block; }
-  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 20px; margin-top: 6px; }
-  .option { display: flex; gap: 6px; font-size: 11pt; }
-  .opt-label { font-weight: 700; color: #374151; min-width: 18px; }
-  .q-meta { white-space: nowrap; font-size: 10pt; padding-top: 1px; }
-  .diff-badge { margin-right: 4px; font-weight: 600; }
-  .marks-badge { color: #555; }
-  .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #1a1a1a; text-align: center; font-size: 10pt; font-style: italic; color: #555; }
+  .q-meta { white-space: nowrap; font-size: 9.5pt; text-align: right; flex-shrink: 0; min-width: 80px; padding-top: 2px; }
+  .diff-easy { color: #15803d; font-weight: 700; }
+  .diff-med  { color: #b45309; font-weight: 700; }
+  .diff-hard { color: #dc2626; font-weight: 700; }
+  .marks { color: #555; }
+
+  /* ── MCQ options ── */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 18px; margin-top: 6px; }
+  .opt { display: flex; gap: 5px; align-items: flex-start; font-size: 11pt; }
+  .opt-key { font-weight: 700; min-width: 18px; flex-shrink: 0; color: #222; }
+
+  /* ── Answer lines ── */
+  .ans-lines { margin-top: 6px; }
+  .ans-line { border-bottom: 1px solid #ccc; height: 22px; margin-bottom: 2px; }
+  .diagram-box {
+    margin-top: 8px; border: 1px solid #999;
+    height: 140px; width: 100%;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 22px; padding-top: 10px;
+    border-top: 2px solid #111;
+    text-align: center; font-size: 10pt; font-style: italic; color: #555;
+  }
 </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Delhi Public School</h1>
-    <h2>Subject: ${subject}</h2>
+  <div class="hdr">
+    <h1>Delhi Public School, Sector-4, Bokaro</h1>
+    <h2>Subject: ${subject} &nbsp;|&nbsp; Class: 8th</h2>
   </div>
-  <div class="meta-row">
-    <span>Time Allowed: —</span>
-    <span>Maximum Marks: ${totalMarks}</span>
+
+  <table class="meta">
+    <tr>
+      <td><span class="lbl">Time Allowed:</span> ${timeAllowed} minutes</td>
+      <td class="center"><span class="lbl">Total Questions:</span> ${totalQuestions}</td>
+      <td class="right"><span class="lbl">Maximum Marks:</span> ${totalMarks}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="right"><span class="lbl">Date:</span> ${dueDate}</td>
+    </tr>
+  </table>
+
+  <div class="instruct">
+    General Instructions: All questions are compulsory unless stated otherwise.
+    Read all questions carefully before answering.
   </div>
-  <div class="meta-row">
-    <span>Total Questions: ${totalQuestions}</span>
-    <span>Date: ${dueDate}</span>
+
+  <div class="stu-row">
+    <div class="stu-field">
+      <div class="stu-label">Name:</div>
+      <div class="stu-line"></div>
+    </div>
+    <div class="stu-field">
+      <div class="stu-label">Roll Number:</div>
+      <div class="stu-line"></div>
+    </div>
+    <div class="stu-field">
+      <div class="stu-label">Class / Section:</div>
+      <div class="stu-line"></div>
+    </div>
   </div>
-  <div class="instructions">All questions are compulsory unless stated otherwise.</div>
-  <div class="student-info">
-    <table>
-      <tr>
-        <td>Name: <span>&nbsp;</span></td>
-        <td>Roll Number: <span>&nbsp;</span></td>
-        <td>Class / Section: <span>&nbsp;</span></td>
-      </tr>
-    </table>
-  </div>
+
   ${sectionsHtml}
+
   <div class="footer">— End of Question Paper —</div>
 </body>
 </html>`;

@@ -88,7 +88,7 @@ function SectionBlock({
         <h4 className="text-[14px] font-bold text-veda-gray-900 mb-1">{section.title}</h4>
         <p className="text-[12px] text-veda-gray-500 italic">{section.instruction}</p>
       </div>
-      <div className="bg-white rounded-[12px] border border-veda-gray-200 px-4 overflow-hidden">
+      <div className="bg-white rounded-[12px] border border-veda-gray-200 px-4">
         {section.questions.map((q, qi) => (
           <QuestionItem key={qi} question={q} number={questionOffset + qi + 1} />
         ))}
@@ -100,6 +100,7 @@ function SectionBlock({
 export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProps) {
   const paperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const totalMarks = paper.sections.reduce(
     (sum, s) => sum + s.questions.reduce((qs, q) => qs + q.marks, 0),
@@ -109,11 +110,15 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
 
   const handleDownload = async () => {
     setDownloading(true);
+    setDownloadError(null);
     try {
       const res = await fetch(papersApi.pdfUrl(paper._id), {
         signal: AbortSignal.timeout(120_000),
       });
-      if (!res.ok) throw new Error('PDF generation failed');
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `Server error ${res.status}`);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -123,8 +128,9 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      window.print();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Download failed';
+      setDownloadError(`PDF generation failed — ${msg}. Try using the browser print dialog instead.`);
     } finally {
       setDownloading(false);
     }
@@ -134,6 +140,25 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
 
   return (
     <div className="max-w-[820px] mx-auto px-6 pb-12">
+      {downloadError && (
+        <div className="no-print mb-4 p-3 bg-red-50 border border-red-200 rounded-[10px] flex items-start justify-between gap-3">
+          <p className="text-[12.5px] text-red-700 leading-relaxed flex-1">{downloadError}</p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => window.print()}
+              className="text-[12px] font-medium text-red-600 underline underline-offset-2 hover:text-red-800"
+            >
+              Use print dialog
+            </button>
+            <button
+              onClick={() => setDownloadError(null)}
+              className="text-[11px] text-red-400 hover:text-red-600 font-medium"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       <div className="no-print mb-6 p-4 bg-veda-orange-light border border-veda-orange/20 rounded-[12px] flex items-start gap-3">
         <div className="w-8 h-8 rounded-full bg-gradient-veda flex items-center justify-center shrink-0 shadow-sm">
           <span className="text-white text-[11px] font-bold">AI</span>
