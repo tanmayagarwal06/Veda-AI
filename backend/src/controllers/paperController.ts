@@ -113,12 +113,17 @@ export async function downloadPdf(
     });
 
     const page = await browser.newPage();
+    // A4 at 96 dpi — ensures content fills the full page width
+    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 });
     await page.setContent(html, { waitUntil: 'load' });
 
     const pdf = await page.pdf({
       format: 'A4',
-      margin: { top: '20mm', bottom: '20mm', left: '20mm', right: '20mm' },
+      margin: { top: '25mm', bottom: '25mm', left: '25mm', right: '25mm' },
       printBackground: true,
+      displayHeaderFooter: true,
+      headerTemplate: '<span></span>',
+      footerTemplate: `<div style="width:100%;text-align:center;font-size:9pt;color:#666;font-family:'Times New Roman',serif;padding-top:6px;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>`,
     });
 
     await browser.close();
@@ -135,7 +140,7 @@ export async function downloadPdf(
   }
 }
 
-const OPT = ['A', 'B', 'C', 'D'];
+const OPT = ['A', 'B', 'C', 'D', 'E', 'F'];
 const SEC = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 function answerLines(type: string, marks: number): string {
@@ -146,6 +151,19 @@ function answerLines(type: string, marks: number): string {
     type === 'Numerical'   ? 5 :
     Math.max(3, marks * 2);
   return `<div class="ans-lines">${'<div class="ans-line"></div>'.repeat(count)}</div>`;
+}
+
+// Renders MCQ options in a 2-column flex layout (A+B on row 1, C+D on row 2)
+function renderOptions(options: string[]): string {
+  const rows: string[] = [];
+  for (let i = 0; i < options.length; i += 2) {
+    const left = `<div class="opt"><span class="opt-key">${OPT[i]})</span><span class="opt-text">${options[i]}</span></div>`;
+    const right = i + 1 < options.length
+      ? `<div class="opt"><span class="opt-key">${OPT[i + 1]})</span><span class="opt-text">${options[i + 1]}</span></div>`
+      : '<div class="opt"></div>';
+    rows.push(`<div class="opts-row">${left}${right}</div>`);
+  }
+  return `<div class="options">${rows.join('')}</div>`;
 }
 
 function generatePaperHTML(
@@ -178,9 +196,7 @@ function generatePaperHTML(
         q.difficulty === 'hard' ? 'diff-hard' : 'diff-med';
 
       const optHtml = q.options && q.options.length > 0
-        ? `<div class="options">${q.options.map((o, i) =>
-            `<div class="opt"><span class="opt-key">${OPT[i]}.</span><span>${o}</span></div>`
-          ).join('')}</div>`
+        ? renderOptions(q.options)
         : '';
 
       const ansHtml = answerLines(q.type, q.marks);
@@ -219,7 +235,8 @@ function generatePaperHTML(
 <meta charset="UTF-8"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
+  html, body {
+    width: 100%;
     font-family: 'Times New Roman', Times, serif;
     font-size: 11.5pt;
     color: #111;
@@ -242,14 +259,19 @@ function generatePaperHTML(
   .instruct {
     font-size: 10.5pt; font-style: italic; color: #444;
     padding: 5px 0; border-top: 1px solid #bbb; border-bottom: 1px solid #bbb;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   /* ── Student info ── */
-  .stu-row { display: flex; gap: 20px; margin-bottom: 18px; }
-  .stu-field { flex: 1; }
-  .stu-label { font-size: 10pt; font-weight: bold; margin-bottom: 3px; }
-  .stu-line { border-bottom: 1.5px solid #333; min-height: 20px; }
+  .stu-row { display: flex; gap: 24px; margin-bottom: 20px; }
+  .stu-field { flex: 1; min-width: 0; }
+  .stu-label { font-size: 10.5pt; font-weight: bold; margin-bottom: 8px; display: block; }
+  .stu-line {
+    display: block;
+    border-bottom: 2px solid #222;
+    min-height: 26px;
+    width: 100%;
+  }
 
   /* ── Section ── */
   .section { margin-bottom: 22px; }
@@ -264,22 +286,28 @@ function generatePaperHTML(
 
   /* ── Questions ── */
   .question {
-    display: flex; gap: 8px; margin-bottom: 13px;
-    page-break-inside: avoid; align-items: flex-start;
+    display: flex; gap: 8px; margin-bottom: 16px;
+    page-break-inside: avoid; break-inside: avoid;
+    align-items: flex-start;
   }
   .q-num { font-weight: bold; min-width: 26px; flex-shrink: 0; padding-top: 1px; }
   .q-body { flex: 1; min-width: 0; }
   .q-text { display: block; }
-  .q-meta { white-space: nowrap; font-size: 9.5pt; text-align: right; flex-shrink: 0; min-width: 80px; padding-top: 2px; }
+  .q-meta {
+    white-space: nowrap; font-size: 9.5pt; text-align: right;
+    flex-shrink: 0; width: 90px; padding-top: 2px;
+  }
   .diff-easy { color: #15803d; font-weight: 700; }
   .diff-med  { color: #b45309; font-weight: 700; }
   .diff-hard { color: #dc2626; font-weight: 700; }
   .marks { color: #555; }
 
-  /* ── MCQ options ── */
-  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 18px; margin-top: 6px; }
-  .opt { display: flex; gap: 5px; align-items: flex-start; font-size: 11pt; }
-  .opt-key { font-weight: 700; min-width: 18px; flex-shrink: 0; color: #222; }
+  /* ── MCQ options — 2-column flex layout ── */
+  .options { margin-top: 10px; margin-bottom: 4px; }
+  .opts-row { display: flex; width: 100%; margin-bottom: 6px; }
+  .opt { width: 50%; display: flex; gap: 6px; align-items: flex-start; font-size: 11pt; padding-right: 8px; }
+  .opt-key { font-weight: 700; min-width: 22px; flex-shrink: 0; color: #222; }
+  .opt-text { flex: 1; }
 
   /* ── Answer lines ── */
   .ans-lines { margin-top: 6px; }
