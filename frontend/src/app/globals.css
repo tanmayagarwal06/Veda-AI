@@ -71,7 +71,7 @@ select {
 @media print {
   @page {
     size: A4;
-    margin: 18mm 20mm;
+    margin: 15mm 12mm;
   }
 
   .no-print {
@@ -82,50 +82,86 @@ select {
     display: none !important;
   }
 
-  body {
+  /* ── Reset html/body so nothing clips ── */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
     background: white !important;
     font-size: 11pt;
   }
 
-  /* Reset layout containers so content flows naturally across pages */
-  main {
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
+  /* ── Collapse app-shell flex layout ── */
+  /* h-screen on the outer wrappers would limit print height */
+  .h-screen {
     height: auto !important;
-    max-height: none !important;
   }
 
-  /* Remove all overflow clipping — let content span pages */
+  /* overflow-hidden on wrappers clips content beyond the viewport */
   .overflow-hidden {
     overflow: visible !important;
   }
 
-  /* Remove card styling so content flows naturally */
-  .bg-white.rounded-\[16px\] {
+  /* overflow-y-auto on main was the scroll container — must be visible in print */
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  /* flex-1 can lock items to a fraction of viewport height in a flex column */
+  .flex-1 {
+    flex: none !important;
+    height: auto !important;
+  }
+
+  /* Sidebar is hidden but its margin still pushes content 228px right — remove it */
+  .ml-\[228px\] {
+    margin-left: 0 !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ── Remove card chrome ── */
+  .rounded-\[16px\] {
     border-radius: 0 !important;
     border: none !important;
     box-shadow: none !important;
   }
 
-  /* Keep section borders */
-  .border-b {
-    border-bottom: 1px solid #e5e7eb !important;
+  /* ── Fix left alignment — remove large horizontal padding ── */
+  /* The outer wrapper px-6 and card interior px-8 both add left indent */
+  .max-w-\[820px\] {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Don't break individual questions across pages */
+  .px-8 {
+    padding-left: 2mm !important;
+    padding-right: 2mm !important;
+  }
+
+  /* ── Page-break rules ── */
+  /* Keep each question on one page */
   .border-b.border-veda-gray-100 {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Allow sections to span pages — avoidance on whole sections breaks layout for long papers */
+  /* Allow long sections to span pages */
   .mb-8 {
     page-break-inside: auto;
     break-inside: auto;
   }
 
-  /* Hide input placeholders, show clean underlines */
+  /* Keep section header + first question together */
+  .mb-8 > div:first-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* ── Student info fields ── */
   input {
     border: none !important;
     border-bottom: 1px solid #333 !important;
@@ -133,11 +169,5 @@ select {
     background: transparent !important;
     color: transparent !important;
     -webkit-text-fill-color: transparent !important;
-  }
-
-  /* Outer wrapper — remove padding/max-width constraints */
-  .max-w-\[820px\] {
-    max-width: 100% !important;
-    padding: 0 !important;
   }
 }
