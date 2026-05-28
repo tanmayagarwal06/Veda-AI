@@ -180,7 +180,7 @@ export default function PaperPage() {
 
   return (
     <MainLayout>
-      <div className="min-h-full">
+      <div>
         {initialLoading && (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-3 text-veda-gray-500">

@@ -71,7 +71,7 @@ select {
 @media print {
   @page {
     size: A4;
-    margin: 18mm 16mm;
+    margin: 18mm 20mm;
   }
 
   .no-print {
@@ -87,9 +87,18 @@ select {
     font-size: 11pt;
   }
 
+  /* Reset layout containers so content flows naturally across pages */
   main {
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Remove all overflow clipping — let content span pages */
+  .overflow-hidden {
+    overflow: visible !important;
   }
 
   /* Remove card styling so content flows naturally */
@@ -97,7 +106,6 @@ select {
     border-radius: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    overflow: visible !important;
   }
 
   /* Keep section borders */
@@ -105,16 +113,16 @@ select {
     border-bottom: 1px solid #e5e7eb !important;
   }
 
-  /* Don't break questions across pages */
+  /* Don't break individual questions across pages */
   .border-b.border-veda-gray-100 {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Don't break sections across pages */
+  /* Allow sections to span pages — avoidance on whole sections breaks layout for long papers */
   .mb-8 {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
   }
 
   /* Hide input placeholders, show clean underlines */
