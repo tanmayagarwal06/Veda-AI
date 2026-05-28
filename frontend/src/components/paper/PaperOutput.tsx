@@ -136,7 +136,7 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
           )}
         >
           <Download className="w-3.5 h-3.5" />
-          Download as PDF
+          Print / Save as PDF
         </button>
       </div>
       <div ref={paperRef} className="bg-white rounded-[16px] border border-veda-gray-200 shadow-card overflow-hidden">
@@ -255,7 +255,7 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
           )}
         >
           <Download className="w-4 h-4" />
-          Download as PDF
+          Print / Save as PDF
         </button>
       </div>
     </div>

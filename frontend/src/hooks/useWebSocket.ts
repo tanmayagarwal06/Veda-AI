@@ -22,6 +22,7 @@ export function useWebSocket({
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnects = 3;
+  const intentionalClose = useRef(false);
 
   // Store callbacks in refs — inline functions passed as props change every render,
   // which would recreate `connect` and retrigger the effect causing an infinite loop.
@@ -54,6 +55,7 @@ export function useWebSocket({
 
     ws.onopen = () => {
       reconnectAttempts.current = 0;
+      intentionalClose.current = false;
       setConnectionStatus('connected');
       ws.send(JSON.stringify({ type: 'subscribe', assignmentId }));
     };
@@ -66,10 +68,12 @@ export function useWebSocket({
           setProgress(msg.progress, msg.message);
           onProgressRef.current?.(msg.progress, msg.message);
         } else if (msg.type === 'job:complete') {
+          intentionalClose.current = true;
           setComplete(msg.paperId);
           onCompleteRef.current?.(msg.paperId);
           ws.close();
         } else if (msg.type === 'job:failed') {
+          intentionalClose.current = true;
           setFailed(msg.error);
           onFailedRef.current?.(msg.error);
           ws.close();
@@ -88,7 +92,7 @@ export function useWebSocket({
       wsRef.current = null;
       setWs(null);
 
-      if (reconnectAttempts.current < maxReconnects) {
+      if (!intentionalClose.current && reconnectAttempts.current < maxReconnects) {
         reconnectAttempts.current++;
         const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 10000);
         setTimeout(connect, delay);

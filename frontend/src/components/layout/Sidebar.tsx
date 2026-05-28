@@ -33,6 +33,7 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
+    if (href === '/assignments') return pathname === '/assignments' || pathname.startsWith('/assignments/') || pathname.startsWith('/paper/');
     return pathname === href || pathname.startsWith(href + '/');
   };
 

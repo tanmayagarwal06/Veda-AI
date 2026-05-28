@@ -32,8 +32,6 @@ export function FileUpload({ fileName, onFile, onClear }: FileUploadProps) {
     accept: {
       'text/plain': ['.txt'],
       'application/pdf': ['.pdf'],
-      'image/png': ['.png'],
-      'image/jpeg': ['.jpg', '.jpeg'],
     },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
@@ -92,7 +90,7 @@ export function FileUpload({ fileName, onFile, onClear }: FileUploadProps) {
         <p className="text-[13px] font-medium text-veda-gray-700 mb-0.5">
           {isDragActive ? 'Drop file here' : 'Choose a file or drag & drop it here'}
         </p>
-        <p className="text-[11.5px] text-veda-gray-400">PNG, PDF, JPG up to 10MB</p>
+        <p className="text-[11.5px] text-veda-gray-400">TXT, PDF up to 10MB</p>
       </div>
 
       <button
@@ -107,7 +105,7 @@ export function FileUpload({ fileName, onFile, onClear }: FileUploadProps) {
       </button>
 
       <p className="text-[11px] text-veda-gray-400 mt-1">
-        Upload images of your preferred document/image
+        Upload your document to base questions on its content
       </p>
     </div>
   );
