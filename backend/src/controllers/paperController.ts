@@ -135,6 +135,8 @@ export async function downloadPdf(
   }
 }
 
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];
+
 function generatePaperHTML(
   subject: string,
   dueDate: string,
@@ -143,7 +145,7 @@ function generatePaperHTML(
   sections: Array<{
     title: string;
     instruction: string;
-    questions: Array<{ text: string; difficulty: QuestionDifficulty; marks: number; type: string }>;
+    questions: Array<{ text: string; options?: string[]; difficulty: QuestionDifficulty; marks: number; type: string }>;
   }>,
   difficultyLabel: (d: QuestionDifficulty) => string
 ): string {
@@ -155,10 +157,19 @@ function generatePaperHTML(
         .map((q) => {
           const num = questionNumber++;
           const diffColor = { easy: '#15803d', medium: '#b45309', hard: '#dc2626' }[q.difficulty];
+          const optionsHtml =
+            q.options && q.options.length > 0
+              ? `<div class="options">${q.options
+                  .map((opt, i) => `<div class="option"><span class="opt-label">${OPTION_LABELS[i]}.</span>${opt}</div>`)
+                  .join('')}</div>`
+              : '';
           return `
           <div class="question">
             <span class="q-num">${num}.</span>
-            <span class="q-text">${q.text}</span>
+            <div class="q-body">
+              <span class="q-text">${q.text}</span>
+              ${optionsHtml}
+            </div>
             <span class="q-meta">
               <span class="diff-badge" style="color: ${diffColor}">[${difficultyLabel(q.difficulty)}]</span>
               <span class="marks-badge">[${q.marks} Mark${q.marks > 1 ? 's' : ''}]</span>
@@ -195,10 +206,14 @@ function generatePaperHTML(
   .section { margin-bottom: 24px; }
   .section-header { text-align: center; font-size: 13pt; font-weight: bold; padding: 8px; border: 1px solid #1a1a1a; margin-bottom: 8px; }
   .section-instruction { font-size: 10.5pt; font-style: italic; margin-bottom: 12px; color: #444; }
-  .question { display: flex; gap: 8px; margin-bottom: 12px; font-size: 11.5pt; align-items: flex-start; }
-  .q-num { font-weight: bold; min-width: 24px; }
-  .q-text { flex: 1; }
-  .q-meta { white-space: nowrap; font-size: 10pt; }
+  .question { display: flex; gap: 8px; margin-bottom: 14px; font-size: 11.5pt; align-items: flex-start; page-break-inside: avoid; }
+  .q-num { font-weight: bold; min-width: 24px; padding-top: 1px; }
+  .q-body { flex: 1; }
+  .q-text { display: block; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 20px; margin-top: 6px; }
+  .option { display: flex; gap: 6px; font-size: 11pt; }
+  .opt-label { font-weight: 700; color: #374151; min-width: 18px; }
+  .q-meta { white-space: nowrap; font-size: 10pt; padding-top: 1px; }
   .diff-badge { margin-right: 4px; font-weight: 600; }
   .marks-badge { color: #555; }
   .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #1a1a1a; text-align: center; font-size: 10pt; font-style: italic; color: #555; }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
-import { Download, RefreshCw } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Download, RefreshCw, Loader2 } from 'lucide-react';
 import { cn, DIFFICULTY_CONFIG, formatDateLong, getSectionLetter } from '@/lib/utils';
+import { papersApi } from '@/lib/api';
 import type { GeneratedPaper, Assignment, PaperSection, GeneratedQuestion } from '@/types/index';
 
 interface PaperOutputProps {
@@ -98,6 +99,7 @@ function SectionBlock({
 
 export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProps) {
   const paperRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const totalMarks = paper.sections.reduce(
     (sum, s) => sum + s.questions.reduce((qs, q) => qs + q.marks, 0),
@@ -105,8 +107,27 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
   );
   const totalQuestions = paper.sections.reduce((sum, s) => sum + s.questions.length, 0);
 
-  const handleDownload = () => {
-    window.print();
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const res = await fetch(papersApi.pdfUrl(paper._id), {
+        signal: AbortSignal.timeout(120_000),
+      });
+      if (!res.ok) throw new Error('PDF generation failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${assignment.subject.replace(/[^a-z0-9]/gi, '-')}-exam.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      window.print();
+    } finally {
+      setDownloading(false);
+    }
   };
 
   let runningOffset = 0;
@@ -128,15 +149,17 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
         </div>
         <button
           onClick={handleDownload}
+          disabled={downloading}
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-[8px] text-[12.5px] font-medium shrink-0',
             'bg-white border border-veda-gray-200 text-veda-gray-700',
             'hover:border-veda-orange/50 hover:text-veda-orange hover:bg-veda-orange-light/50',
-            'transition-all duration-150 active:scale-[0.97] shadow-sm'
+            'transition-all duration-150 active:scale-[0.97] shadow-sm',
+            downloading && 'opacity-60 cursor-not-allowed'
           )}
         >
-          <Download className="w-3.5 h-3.5" />
-          Print / Save as PDF
+          {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+          {downloading ? 'Generating…' : 'Download PDF'}
         </button>
       </div>
       <div ref={paperRef} className="bg-white rounded-[16px] border border-veda-gray-200 shadow-card overflow-hidden">
@@ -248,14 +271,16 @@ export function PaperOutput({ paper, assignment, onRegenerate }: PaperOutputProp
         </button>
         <button
           onClick={handleDownload}
+          disabled={downloading}
           className={cn(
             'flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-[13px] font-medium',
             'bg-veda-black text-white',
-            'hover:bg-[#2A2A2A] transition-all duration-150 active:scale-[0.97] shadow-sm'
+            'hover:bg-[#2A2A2A] transition-all duration-150 active:scale-[0.97] shadow-sm',
+            downloading && 'opacity-60 cursor-not-allowed'
           )}
         >
-          <Download className="w-4 h-4" />
-          Print / Save as PDF
+          {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {downloading ? 'Generating…' : 'Download PDF'}
         </button>
       </div>
     </div>
