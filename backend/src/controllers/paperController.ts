@@ -106,9 +106,22 @@ export async function downloadPdf(
     );
 
     const isProduction = process.env.NODE_ENV === 'production';
+
+    // In development puppeteer-core has no bundled Chrome, so we borrow the
+    // executable that the full 'puppeteer' package downloads during npm install.
+    let devExecPath: string | undefined;
+    if (!isProduction) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        devExecPath = require('puppeteer').executablePath() as string;
+      } catch {
+        devExecPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      }
+    }
+
     const browser = await puppeteer.launch({
       args: isProduction ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: isProduction ? await chromium.executablePath() : undefined,
+      executablePath: isProduction ? await chromium.executablePath() : devExecPath,
       headless: true,
     });
 

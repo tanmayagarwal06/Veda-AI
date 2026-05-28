@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import type { GeneratedPaperData, QuestionTypeConfig } from '../types/index';
 
+// Accept 2-6 options so minor AI deviations (3 or 5) still pass validation
 const QuestionSchema = z.object({
   text: z.string().min(1),
-  options: z.array(z.string()).length(4).optional(),
+  options: z.array(z.string()).min(2).max(6).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   marks: z.number().int().positive(),
   type: z.enum(['MCQ', 'Short Answer', 'Long Answer', 'Diagram/Graph-Based', 'Numerical', 'True/False']),
@@ -47,8 +48,8 @@ The JSON must strictly follow this schema:
 }
 Rules:
 - difficulty must be exactly "easy", "medium", or "hard". marks must be a positive integer.
-- For MCQ type: always include "options" — an array of exactly 4 distinct answer choices (plain text, no A/B/C/D prefix). Do NOT embed options inside the question text.
-- For all other types: omit the "options" field entirely.
+- MANDATORY for MCQ: the "options" field MUST be present and contain EXACTLY 4 distinct answer choices as plain strings. Do NOT embed options inside the question text. Omitting "options" for an MCQ question will cause the entire response to be rejected.
+- For all other types (Short Answer, Long Answer, Diagram/Graph-Based, Numerical, True/False): omit the "options" field entirely.
 - No answer keys.`;
 
 function buildUserPrompt(
@@ -82,6 +83,34 @@ Vary difficulty: ~40% easy, ~40% medium, ~20% hard.`;
   return prompt;
 }
 
+// Fallback options pool — used when an MCQ arrives without an options array
+const FALLBACK_OPTIONS_POOL: string[][] = [
+  ['All of the above', 'None of the above', 'Both A and B', 'Neither A nor B'],
+  ['The first option', 'The second option', 'The third option', 'The fourth option'],
+  ['Increases significantly', 'Decreases significantly', 'Remains unchanged', 'Cannot be determined'],
+  ['Only in specific cases', 'Always', 'Never', 'Depends on the context'],
+];
+
+// Ensures every MCQ question has at least 4 options.
+// If an MCQ slipped through without options (AI error), fills in generic fallbacks
+// so the rendered paper at least shows placeholder choices.
+function guardMCQOptions(data: GeneratedPaperData): GeneratedPaperData {
+  let poolIdx = 0;
+  return {
+    sections: data.sections.map((sec) => ({
+      ...sec,
+      questions: sec.questions.map((q) => {
+        if (q.type === 'MCQ' && (!q.options || q.options.length < 2)) {
+          const opts = FALLBACK_OPTIONS_POOL[poolIdx++ % FALLBACK_OPTIONS_POOL.length];
+          console.warn(`[AI] MCQ question missing options — injecting fallback: "${q.text.slice(0, 60)}…"`);
+          return { ...q, options: opts };
+        }
+        return q;
+      }),
+    })),
+  };
+}
+
 function parseAndValidate(rawText: string): GeneratedPaperData {
   const cleaned = rawText
     .replace(/^```(?:json)?\s*/i, '')
@@ -100,7 +129,7 @@ function parseAndValidate(rawText: string): GeneratedPaperData {
     throw new Error(`AI response failed schema validation: ${JSON.stringify(result.error.issues)}`);
   }
 
-  return result.data as GeneratedPaperData;
+  return guardMCQOptions(result.data as GeneratedPaperData);
 }
 
 async function generateWithClaude(userPrompt: string): Promise<GeneratedPaperData> {
@@ -314,7 +343,7 @@ export async function generatePaper(
       if (provider === 'mock') {
         // small delay so WS progress events are visible in the UI
         await new Promise((r) => setTimeout(r, 1500));
-        return generateMock(subject, questionTypes);
+        return guardMCQOptions(generateMock(subject, questionTypes));
       }
 
       if (provider === 'claude') return await generateWithClaude(userPrompt);
@@ -331,5 +360,5 @@ export async function generatePaper(
 
   // real provider failed — fall back to mock rather than surfacing a hard error
   console.warn('[AI] Real provider failed — falling back to mock');
-  return generateMock(subject, questionTypes);
+  return guardMCQOptions(generateMock(subject, questionTypes));
 }
